@@ -1,4 +1,4 @@
-name: G:\anaconda3
+name: bcenv
 channels:
   - conda-forge
   - defaults
