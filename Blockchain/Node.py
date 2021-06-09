@@ -22,9 +22,6 @@ class Node():
         if key is not None:
             self.wallet.fromKey(key)
 
-    #def nodeListener(self, arg):
-
-
     def startP2P(self):
         self.p2p = SocketCommunication(self.ip, self.port)
         self.p2p.startSocketCommunication(self)
@@ -33,6 +30,9 @@ class Node():
         self.api = NodeAPI()
         self.api.injectNode(self)
         self.api.start(apiPort)
+
+    def nodeListener(self, arg):
+        print(f"Received payload: {arg}")
 
     def handleTransaction(self, transaction):
         data = transaction.payload()
