@@ -214,10 +214,11 @@ class KDNode(Node):
         sel_axis(axis) is used when creating subnodes of the current node. It
         receives the axis of the parent node and returns the axis of the child
         node. """
-        super(KDNode, self).__init__(data, left, right)
+        super(KDNode, self).__init__(data, left, right, signature)
         self.axis = axis
         self.sel_axis = sel_axis
         self.dimensions = dimensions
+        self.signature = signature
 
 
     @require_axis
@@ -249,19 +250,34 @@ class KDNode(Node):
             if point[current.axis] < current.data[current.axis]:
                 if current.left is None:
                     current.left = current.create_subnode(point)
-                    #print("parrent = ",current.data.data)
+                    #print("parent = ",current.data.data)
                     return current.left
                 else:
-                    #print("parrent = ",current.data.data)
+                    #print("parent = ",current.data.data)
                     current = current.left
             else:
                 if current.right is None:
                     current.right = current.create_subnode(point)
-                    #print("parrent = ",current.data.data)
+                    #print("parent = ",current.data.data)
                     return current.right
                 else:
-                    #print("parrent = ",current.data.data)
+                    #print("parent = ",current.data.data)
                     current = current.right
+
+    @require_axis
+    def add_node(self, node):
+        if node.data[self.axis] < self.data[self.axis]:
+            if self.is_leaf | self.left is None:
+                self.left = node
+
+                return self.left
+                return self.left.add_node(node)
+        else:
+            if self.is_leaf | self.right is None:
+                self.right = node
+                return self.right
+            else:
+                return self.right.add_node(node)
 
 
 
@@ -620,7 +636,15 @@ def create(point_list=None, dimensions=None, axis=0, sel_axis=None):
     loc   = point_list[median]
     left  = create(point_list[:median], dimensions, sel_axis(axis))
     right = create(point_list[median + 1:], dimensions, sel_axis(axis))
-    return KDNode(loc, left, right, axis=axis, sel_axis=sel_axis, dimensions=dimensions)
+
+    if left is None & right is None:
+        hashed = loc.signature
+    else:
+        hashed = left.signature if right is None \
+            else right.signature if left is None \
+            else left.signature + right.signature
+
+    return KDNode(loc, left, right, axis=axis, sel_axis=sel_axis, dimensions=dimensions, st_hash=loc.signature)
 
 
 def check_dimensionality(point_list, dimensions=None):

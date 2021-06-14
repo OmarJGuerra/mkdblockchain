@@ -8,7 +8,7 @@ class Blockchain():
 
     def __init__(self):
         self.blocks = [Block.genesis()]
-        #self.blocks = kdtree.KDNode
+        # self.blocks = kdtree.KDNode
         self.accountModel = AccountModel()
         self.pos = ProofOfStake()
 
