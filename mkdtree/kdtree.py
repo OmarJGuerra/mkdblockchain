@@ -267,13 +267,13 @@ class KDNode(Node):
     @require_axis
     def add_node(self, node):
         if node.data[self.axis] < self.data[self.axis]:
-            if self.is_leaf | self.left is None:
+            if self.left is None:
                 self.left = node
 
                 return self.left
                 return self.left.add_node(node)
         else:
-            if self.is_leaf | self.right is None:
+            if self.right is None:
                 self.right = node
                 return self.right
             else:
@@ -644,7 +644,7 @@ def create(point_list=None, dimensions=None, axis=0, sel_axis=None):
             else right.signature if left is None \
             else left.signature + right.signature
 
-    return KDNode(loc, left, right, axis=axis, sel_axis=sel_axis, dimensions=dimensions, st_hash=loc.signature)
+    return KDNode(loc, left, right, axis=axis, sel_axis=sel_axis, dimensions=dimensions, st_hash=hashed)
 
 
 def check_dimensionality(point_list, dimensions=None):
