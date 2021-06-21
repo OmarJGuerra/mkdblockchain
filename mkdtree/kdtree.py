@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-"""A Python implemntation of a kd-tree
+"""A Python implementation of a kd-tree
 
 This package provides a simple implementation of a kd-tree in Python.
 https://en.wikipedia.org/wiki/K-d_tree
@@ -214,11 +214,11 @@ class KDNode(Node):
         sel_axis(axis) is used when creating subnodes of the current node. It
         receives the axis of the parent node and returns the axis of the child
         node. """
-        super(KDNode, self).__init__(data, left, right, signature)
+        super(KDNode, self).__init__(data, left, right)
         self.axis = axis
         self.sel_axis = sel_axis
         self.dimensions = dimensions
-        self.signature = signature
+        self.subtree_hash = ''
 
 
     @require_axis
@@ -240,7 +240,7 @@ class KDNode(Node):
             # Adding has hit an empty leaf-node, add here
             if current.data is None:
 
-                #we need to biuld a new point to include parent hash
+                #we need to build a new point to include parent hash
                 #point = item(x,y,z,payload,phash)
 
                 current.data = point
@@ -264,22 +264,6 @@ class KDNode(Node):
                     #print("parent = ",current.data.data)
                     current = current.right
 
-    @require_axis
-    def add_node(self, node):
-        if node.data[self.axis] < self.data[self.axis]:
-            if self.left is None:
-                self.left = node
-
-                return self.left
-                return self.left.add_node(node)
-        else:
-            if self.right is None:
-                self.right = node
-                return self.right
-            else:
-                return self.right.add_node(node)
-
-
 
     @require_axis
     def create_subnode(self, data):
@@ -289,6 +273,22 @@ class KDNode(Node):
                 axis=self.sel_axis(self.axis),
                 sel_axis=self.sel_axis,
                 dimensions=self.dimensions)
+
+
+    @require_axis
+    def add_node(self, node):
+        if node.data[self.axis] < self.data[self.axis]:
+            if not self.left:
+                self.left = node
+                return self.left
+            else:
+                return self.left.add_node(node)
+        else:
+            if not self.right:
+                self.right = node
+                return self.right
+            else:
+                return self.right.add_node(node)
 
 
     @require_axis
@@ -322,7 +322,7 @@ class KDNode(Node):
 
         If there are multiple points matching "point", only one is removed. The
         optional "node" parameter is used for checking the identity, once the
-        removeal candidate is decided."""
+        removal candidate is decided."""
 
         # Recursion has reached an empty leaf node, nothing here to delete
         if not self:
@@ -600,11 +600,13 @@ class KDNode(Node):
         return sel_func(candidates, key=max_key)
 
 
-
 def create(point_list=None, dimensions=None, axis=0, sel_axis=None):
     """ Creates a kd-tree from a list of points
 
     All points in the list must be of the same dimensionality.
+
+    If no point_list is given, a genesis tree is created. The number of
+    dimensions has to be given instead.
 
     If no point_list is given, an empty tree is created. The number of
     dimensions has to be given instead.
@@ -637,12 +639,12 @@ def create(point_list=None, dimensions=None, axis=0, sel_axis=None):
     left  = create(point_list[:median], dimensions, sel_axis(axis))
     right = create(point_list[median + 1:], dimensions, sel_axis(axis))
 
-    if left is None & right is None:
-        hashed = loc.signature
+    if left.data is None and right.data is None:
+        hashed = loc.hash()
     else:
-        hashed = left.signature if right is None \
-            else right.signature if left is None \
-            else left.signature + right.signature
+        hashed = left.hash() if right is None \
+            else right.hash() if left is None \
+            else (left.hash() + right.hash()).hash()
 
     return KDNode(loc, left, right, axis=axis, sel_axis=sel_axis, dimensions=dimensions, st_hash=hashed)
 
@@ -654,7 +656,6 @@ def check_dimensionality(point_list, dimensions=None):
             raise ValueError('All Points in the point_list must have the same dimensionality')
 
     return dimensions
-
 
 
 def level_order(tree, include_all=False):
@@ -674,7 +675,6 @@ def level_order(tree, include_all=False):
 
         if include_all or node.right:
             q.append(node.right or node.__class__())
-
 
 
 def visualize(tree, max_level=100, node_width=10, left_padding=5):

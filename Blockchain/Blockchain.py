@@ -2,18 +2,21 @@ from Block import Block
 from BlockchainUtils import BlockchainUtils
 from AccountModel import AccountModel
 from ProofOfStake import ProofOfStake
+from mkdtree import kdtree
 
-
+#TODO: link code so that blockchain is treated as mkd tree
 class Blockchain():
 
     def __init__(self):
-        self.blocks = [Block.genesis()]
+        self.blocks = kdtree.genesis()
+        # self.blocks = kdtree.KDNode()
         # self.blocks = kdtree.KDNode
         self.accountModel = AccountModel()
         self.pos = ProofOfStake()
 
     def addBlock(self, block):
         self.executeTransactions(block.transactions)
+        self.blocks.add_node()
         self.blocks.append(block)
 
     def toJson(self):
@@ -111,3 +114,6 @@ class Blockchain():
         if len(coveredTransactions) == len(transactions):
             return True
         return False
+
+    def merge(self, bc):
+        self.blocks.add_node(bc)
