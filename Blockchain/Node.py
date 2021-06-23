@@ -5,7 +5,6 @@ from SocketCommunication import SocketCommunication
 from NodeAPI import NodeAPI
 from Message import Message
 from BlockchainUtils import BlockchainUtils
-from pubsub import sub
 from pubsub import pub
 import copy
 
@@ -32,7 +31,7 @@ class Node():
         self.api.start(apiPort)
 
     def nodeListener(self, arg):
-        print(f"Received payload: {arg}")
+        print(f'Received payload: {arg}')
 
     def handleTransaction(self, transaction):
         data = transaction.payload()
@@ -40,10 +39,10 @@ class Node():
         signerPublicKey = transaction.senderPublicKey
         signatureValid = Wallet.signatureValid(
             data, signature, signerPublicKey)
-        transactionExists = self.transactionPool.transactionExists(transaction)
+        transactionExists = self.transactionPool.transaction_exists(transaction)
         transactionInBlock = self.blockchain.transactionExists(transaction)
         if not transactionExists and not transactionInBlock and signatureValid:
-            self.transactionPool.addTransaction(transaction)
+            self.transactionPool.add_transaction(transaction)
             message = Message(self.p2p.socketConnector,
                               'TRANSACTION', transaction)
             encodedMessage = BlockchainUtils.encode(message)
@@ -67,7 +66,7 @@ class Node():
             self.requestChain()
         if lastBlockHashValid and forgerValid and transactionsValid and signatureValid:
             self.blockchain.addBlock(block)
-            self.transactionPool.removeFromPool(block.transactions)
+            self.transactionPool.remove_from_pool(block.transactions)
             message = Message(self.p2p.socketConnector, 'BLOCK', block)
             self.p2p.broadcast(BlockchainUtils.encode(message))
 
@@ -84,16 +83,17 @@ class Node():
             for blockNumber, block in enumerate(blockchain.blocks):
                 if blockNumber >= localBlockCount:
                     localBlockchainCopy.addBlock(block)
-                    self.transactionPool.removeFromPool(block.transactions)
+                    self.transactionPool.remove_from_pool(block.transactions)
             self.blockchain = localBlockchainCopy
 
+    # TODO: Modify forger (remove extraneous operations, add necessary behavior)
     def forge(self):
         forger = self.blockchain.nextForger()
         if forger == self.wallet.publicKeyString():
             print('i am the forger')
             block = self.blockchain.createBlock(
                 self.transactionPool.transactions, self.wallet)
-            self.transactionPool.removeFromPool(
+            self.transactionPool.remove_from_pool(
                 self.transactionPool.transactions)
             message = Message(self.p2p.socketConnector, 'BLOCK', block)
             self.p2p.broadcast(BlockchainUtils.encode(message))

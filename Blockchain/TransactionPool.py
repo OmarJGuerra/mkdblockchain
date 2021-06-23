@@ -1,20 +1,20 @@
 
 
-class TransactionPool():
+class TransactionPool:
 
     def __init__(self):
         self.transactions = []
 
-    def addTransaction(self, transaction):
+    def add_transaction(self, transaction):
         self.transactions.append(transaction)
 
-    def transactionExists(self, transaction):
+    def transaction_exists(self, transaction):
         for poolTransaction in self.transactions:
             if poolTransaction.equals(transaction):
                 return True
         return False
 
-    def removeFromPool(self, transactions):
+    def remove_from_pool(self, transactions):
         newPoolTransactions = []
         for poolTransaction in self.transactions:
             insert = True

@@ -2,14 +2,14 @@ import time
 import copy
 
 
-class Block():
-
+class Block:
     # def __init__(self, transactions, lastHash, x, y, forger, blockCount):
-    def __init__(self, transactions, lastHash, x, y, forger, blockCount):
-        self.blockCount = blockCount
+    def __init__(self, transactions, lastHash, lastBlock, nodeID, x, y, forger, blockCount):
+        # self.blockCount = blockCount
         self.transactions = transactions
         self.lastHash = lastHash
-        self.coords = [x, y, time.time()]
+        self.lastBlock = lastBlock
+        self.coords = [nodeID, x, y, time.time()]
         # self.x = x
         # self.y = y
         # self.timestamp = time.time()
@@ -19,22 +19,23 @@ class Block():
     def __getitem__(self, item):
         return self.coords[item]
 
+    # block[1] -> return self.coors[1]
     def __setitem__(self, key, value):
         self.coords[key] = value
 
     def __len__(self):
-        return self.coords
+        return len(self.coords)
 
     @staticmethod
     def genesis():
-        genesisBlock = Block([], 'genesisHash', 'genesis')
+        genesisBlock = Block([], 'genesisHash', 'genesis', x=0, y=0)
         genesisBlock[2] = 0
         # genesisBlock.timestamp = 0
         return genesisBlock
 
     def toJson(self):
         data = {}
-        data['blockCount'] = self.blockCount
+        # data['blockCount'] = self.blockCount
         data['lastHash'] = self.lastHash
         data['signature'] = self.signature
         data['forger'] = self.forger
@@ -53,7 +54,7 @@ class Block():
         return jsonRepresentation
 
     def __repr__(self):
-        return f'Block({self.coords}, {self.data}, {self.mhash})'
+        return f'Block({self.coords}, {self.transactions}, {hash(self)})'
 
     def __hash__(self):
         return hash(self.coords)

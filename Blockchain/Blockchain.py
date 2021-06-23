@@ -4,29 +4,30 @@ from AccountModel import AccountModel
 from ProofOfStake import ProofOfStake
 from mkdtree import kdtree
 
-#TODO: link code so that blockchain is treated as mkd tree
-class Blockchain():
 
+# TODO: link code so that blockchain is treated as mkd tree
+class Blockchain():
     def __init__(self):
-        self.blocks = kdtree.genesis()
-        # self.blocks = kdtree.KDNode()
+        self.blocks = kdtree.KDNode(Block.genesis(), left=None, right=None, axis=0)
         # self.blocks = kdtree.KDNode
         self.accountModel = AccountModel()
         self.pos = ProofOfStake()
 
     def addBlock(self, block):
         self.executeTransactions(block.transactions)
-        self.blocks.add_node()
-        self.blocks.append(block)
+        self.blocks.add(block)
+        # self.blocks.append(block)
 
+    # modified loop to traverse the tree in order
     def toJson(self):
         data = {}
         jsonBlocks = []
-        for block in self.blocks:
+        for block in self.blocks.inorder():
             jsonBlocks.append(block.toJson())
         data['blocks'] = jsonBlocks
         return data
 
+    # NOTE: Might not need blockcount
     def blockCountValid(self, block):
         if self.blocks[-1].blockCount == block.blockCount - 1:
             return True
@@ -85,13 +86,14 @@ class Blockchain():
         nextForger = self.pos.forger(lastBlockHash)
         return nextForger
 
+    # TODO: Implement kdtree version of parent hash - replace indexing with tree traversal
     def createBlock(self, transactionsFromPool, forgerWallet):
         coveredTransactions = self.getCoveredTransactionSet(
             transactionsFromPool)
         self.executeTransactions(coveredTransactions)
         newBlock = forgerWallet.createBlock(
             coveredTransactions, BlockchainUtils.hash(self.blocks[-1].payload()).hexdigest(), len(self.blocks))
-        self.blocks.append(newBlock)
+        self.blocks.add(newBlock)
         return newBlock
 
     def transactionExists(self, transaction):
@@ -115,5 +117,6 @@ class Blockchain():
             return True
         return False
 
+    # TODO: loop through bc to add each node to self instead of the entire bc tree
     def merge(self, bc):
         self.blocks.add_node(bc)

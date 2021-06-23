@@ -181,7 +181,8 @@ class Node(object):
             return self.data == other.data
 
     def __hash__(self):
-        return id(self)
+        return self.data.hash()
+
 
 
 def require_axis(f):
@@ -218,7 +219,13 @@ class KDNode(Node):
         self.axis = axis
         self.sel_axis = sel_axis
         self.dimensions = dimensions
-        self.subtree_hash = ''
+        self.size = 0
+        if left is None and right is None:
+            self.subtree_hash = hash(self.data)
+        else:
+            self.subtree_hash = hash(left) if right is None \
+                else hash(right) if left is None \
+                else hash(hash(left) + (hash(right)))
 
 
     @require_axis
@@ -239,26 +246,34 @@ class KDNode(Node):
 
             # Adding has hit an empty leaf-node, add here
             if current.data is None:
-
                 #we need to build a new point to include parent hash
                 #point = item(x,y,z,payload,phash)
-
                 current.data = point
+                current.subtree_hash = hash(current.data)
                 return current
 
             # split on self.axis, recurse either left or right
             if point[current.axis] < current.data[current.axis]:
+                righthash = hash(current.right) if current.right is not None else ''
                 if current.left is None:
                     current.left = current.create_subnode(point)
+                    current.subtree_hash = hash(current.left + righthash)
                     #print("parent = ",current.data.data)
+                    current.size += 1
                     return current.left
                 else:
                     #print("parent = ",current.data.data)
+                    current.subtree_hash = hash(current.left + righthash)
+                    #print("parent = ",current.data.data)
+                    current.size += 1
                     current = current.left
             else:
+                lefthash = hash(current.left) if current.left is not None else ''
                 if current.right is None:
                     current.right = current.create_subnode(point)
+                    current.subtree_hash = hash(lefthash + current.right)
                     #print("parent = ",current.data.data)
+                    current.size += 1
                     return current.right
                 else:
                     #print("parent = ",current.data.data)
@@ -639,14 +654,23 @@ def create(point_list=None, dimensions=None, axis=0, sel_axis=None):
     left  = create(point_list[:median], dimensions, sel_axis(axis))
     right = create(point_list[median + 1:], dimensions, sel_axis(axis))
 
+    '''
+    may not be necessary
+    '''
+    # loc.block.point_list = point_list
+
     if left.data is None and right.data is None:
-        hashed = loc.hash()
+        hashed = hash(loc)
     else:
-        hashed = left.hash() if right is None \
-            else right.hash() if left is None \
-            else (left.hash() + right.hash()).hash()
+        hashed = hash(left.data) if right is None \
+            else hash(right.data) if left is None \
+            else hash(hash(left.data) + hash(right.data))
 
     return KDNode(loc, left, right, axis=axis, sel_axis=sel_axis, dimensions=dimensions, st_hash=hashed)
+
+
+def create_root(genesisdata):
+    return KDNode(genesisdata, axis=0,)
 
 
 def check_dimensionality(point_list, dimensions=None):
