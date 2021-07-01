@@ -120,5 +120,5 @@ if __name__ == '__main__':
     #add block to the blockchain
     #blockchain.add_block(block)
     print("--------------------------------------------------")
-    print("Full Blockchain = ")
+    print("Full blockchain = ")
     pprint.pprint(blockchain.to_json())
