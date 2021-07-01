@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 
-"""A Python implementation of a kd-tree
+"""
+A Python implementation of a kd-tree.
 
 This package provides a simple implementation of a kd-tree in Python.
 https://en.wikipedia.org/wiki/K-d_tree
@@ -38,7 +39,7 @@ class Node(object):
     def is_leaf(self):
         """
         Returns True if a Node has no subnodes.
-
+        eg:
                 >>> Node().is_leaf
                 True
 
@@ -100,7 +101,7 @@ class Node(object):
 
         The children are returned as (Node, pos) tuples where pos is 0 for the
         left subnode and 1 for the right.
-
+        eg:
                 >>> len(list(create(dimensions=2).children))
                 0
 
@@ -119,7 +120,7 @@ class Node(object):
         """
         Sets one of the node's children.
 
-        index 0 refers to the left child, 1 to the right child
+        index 0 refers to the left child, 1 to the right child.
         """
         if index == 0:
             self.left = child
@@ -129,7 +130,7 @@ class Node(object):
     def height(self):
         """
         Returns height of the (sub)tree, without considering empty leaf-nodes.
-
+        eg:
                 >>> create(dimensions=2).height()
                 0
 
@@ -191,7 +192,7 @@ class KDNode(Node):
     """A Node that contains kd-tree specific data and methods."""
 
     def __init__(self, data=None, left=None, right=None, axis=None,
-                 sel_axis=None, dimensions=None):
+                 sel_axis=None, dimensions=None, st_hash=None):
         """
         Creates a new node for a kd-tree.
 
@@ -207,6 +208,7 @@ class KDNode(Node):
         self.sel_axis = sel_axis
         self.dimensions = dimensions
         self.size = 0
+        self.st_hash = st_hash
         self.latest_node = self
         if left is None and right is None:
             self.subtree_hash = hash(self.data)
@@ -232,7 +234,6 @@ class KDNode(Node):
         Adds a point to the current node or iteratively descends to one of its children.
 
         Re-hashes the relevant branch bottom-up when point is added.
-
         Users should call add() only to the topmost tree.
         """
         current = self
@@ -275,9 +276,6 @@ class KDNode(Node):
                     # print("parent = ",current.data.data)
                     current.subtree_hash = hash(left_hash + hash(current.right))
                     current = current.right
-
-    def latest(self):
-        return self.latest_node()
 
     @require_axis
     def create_subnode(self, data):

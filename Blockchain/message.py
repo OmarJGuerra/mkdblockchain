@@ -1,3 +1,5 @@
+
+
 class Message:
     def __init__(self, sender_connector, message_type, data):
         self.sender_connector = sender_connector

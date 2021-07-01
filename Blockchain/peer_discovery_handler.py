@@ -1,7 +1,7 @@
 import threading
 import time
-from Message import Message
-from BlockchainUtils import BlockchainUtils
+from message import Message
+from blockchain_utils import BlockchainUtils
 
 
 class PeerDiscoveryHandler():

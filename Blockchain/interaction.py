@@ -1,11 +1,11 @@
-from Wallet import Wallet
-from BlockchainUtils import BlockchainUtils
+from wallet import Wallet
+from blockchain_utils import BlockchainUtils
 import requests
 
 
-def post_transaction(sender, receiver, amount, type):
+def post_transaction(sender, receiver, amount, tr_type):
     transaction = sender.create_transaction(
-        receiver.public_key_string(), amount, type)
+        receiver.public_key_string(), amount, tr_type)
     url = "http://localhost:5000/transaction"
     package = {'transaction': BlockchainUtils.encode(transaction)}
     request = requests.post(url, json=package)

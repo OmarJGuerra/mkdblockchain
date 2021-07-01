@@ -1,22 +1,23 @@
-from MKDBlockchain import MKDBlockchain
-from Transaction import Transaction
-from TransactionPool import TransactionPool
-from Wallet import Wallet
-from SocketCommunication import SocketCommunication
-from NodeAPI import NodeAPI
-from Message import Message
-from Block import Block
-from BlockchainUtils import BlockchainUtils
+from mkd_blockchain import MKDBlockchain
+from transaction import Transaction
+from transaction_pool import TransactionPool
+from wallet import Wallet
+from socket_communication import SocketCommunication
+from node_api import NodeAPI
+from message import Message
+from block import Block
+from blockchain_utils import BlockchainUtils
 from pubsub import pub
 import copy
 
 
 class Node:
 
-    def __init__(self, node_id, port, key=None):
+    def __init__(self, node_id, cluster_id, key=None):
         self.p2p = None
         self.node_id = node_id
-        self.port = port
+        self.cluster_id = cluster_id
+        # self.port = port
         self.blockchain = MKDBlockchain()
         self.transaction_pool = TransactionPool()
         self.wallet = Wallet()
@@ -82,10 +83,10 @@ class Node:
             message = Message(self.p2p.socketConnector, 'BLOCK', block)
             self.p2p.broadcast(BlockchainUtils.encode(message))
 
-    def handle_blockchain_request(self, requestingNode):
+    def handle_blockchain_request(self, requesting_node):
         message = Message(self.p2p.socketConnector,
                           'BLOCKCHAIN', self.blockchain)
-        self.p2p.send(requestingNode, BlockchainUtils.encode(message))
+        self.p2p.send(requesting_node, BlockchainUtils.encode(message))
 
     def handle_blockchain(self, blockchain):
         local_blockchain_copy = copy.deepcopy(self.blockchain)

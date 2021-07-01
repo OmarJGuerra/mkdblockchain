@@ -1,5 +1,5 @@
-from BlockchainUtils import BlockchainUtils
-from Lot import Lot
+from blockchain_utils import BlockchainUtils
+from lot import Lot
 
 
 class ProofOfStake:

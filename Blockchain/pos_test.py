@@ -1,5 +1,5 @@
-from ProofOfStake import ProofOfStake
-from Lot import Lot
+from proof_of_stake import ProofOfStake
+from lot import Lot
 import string
 import random
 

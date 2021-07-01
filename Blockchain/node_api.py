@@ -1,6 +1,6 @@
 from flask_classful import FlaskView, route
 from flask import Flask, jsonify, request
-from BlockchainUtils import BlockchainUtils
+from blockchain_utils import BlockchainUtils
 
 node = None
 

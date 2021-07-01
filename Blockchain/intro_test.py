@@ -1,10 +1,10 @@
-from Transaction import Transaction
-from Wallet import Wallet
-from TransactionPool import TransactionPool
-from Block import Block
-from MKDBlockchain import MKDBlockchain
+from transaction import Transaction
+from wallet import Wallet
+from transaction_pool import TransactionPool
+from block import Block
+from mkd_blockchain import MKDBlockchain
 import pprint
-from BlockchainUtils import BlockchainUtils
+from blockchain_utils import BlockchainUtils
 
 
 
@@ -37,15 +37,14 @@ if __name__ == '__main__':
 
     # ---------------------------------
 
+    wallet = Wallet()  # create wallet
+    fraudulentWallet = Wallet()  # to test only with fake wallet
 
-    wallet = Wallet() #create wallet
-    fraudulentWallet = Wallet() # to test only with fake wallet
-
-    pool = TransactionPool() #create transaction pool
+    pool = TransactionPool()  # create transaction pool
 
     transaction = wallet.create_transaction(receiver, amount, type) #create transaction
     print("--------------------------------------------------")
-    #print(transaction.toJpason())
+    # print(transaction.toJpason())
     print(transaction.payload())
 
     # validate signature - 1  (intro/basic method)
@@ -53,7 +52,7 @@ if __name__ == '__main__':
     # signature_valid = Wallet.signature_valid(transaction.payload(), transaction.signature, fraudulentWallet.public_key_string()) #to test fake wallet
     # print(signature_valid)
 
-    #to check if it detects duplicate transaction, only one must be in the transaction pool
+    # Check if it detects duplicate transaction, only one must be in the transaction pool
     if pool.transaction_exists(transaction) == False:
         pool.add_transaction(transaction)
 

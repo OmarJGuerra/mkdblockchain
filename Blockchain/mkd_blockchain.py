@@ -1,7 +1,7 @@
-from Block import Block
-from BlockchainUtils import BlockchainUtils
-from AccountModel import AccountModel
-from ProofOfStake import ProofOfStake
+from block import Block
+from blockchain_utils import BlockchainUtils
+from account_model import AccountModel
+from proof_of_stake import ProofOfStake
 from mkdtree import kdtree
 
 
@@ -124,5 +124,5 @@ class MKDBlockchain:
     # TODO: loop through bc to add each node to self instead of the entire bc tree
     # somewhat done ?
     def merge(self, bc):
-        for b in bc.inorder():
+        for b in bc.levelorder():
             self.blocks.add_node(b)
