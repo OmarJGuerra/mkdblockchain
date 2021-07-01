@@ -2,7 +2,7 @@ from Transaction import Transaction
 from Wallet import Wallet
 from TransactionPool import TransactionPool
 from Block import Block
-from Blockchain import Blockchain
+from MKDBlockchain import MKDBlockchain
 import pprint
 from BlockchainUtils import BlockchainUtils
 
@@ -19,21 +19,21 @@ if __name__ == '__main__':
     # ---------------------------------
     # this was as practice or intro
     # ---------------------------------
-    # transaction = Transaction(sender, receiver, amount, type)
+    # transaction = Transaction(sender, receiver, amount, tr_type)
     #
-    # print(transaction.toJson())   #prints transaction in readable format using toJason()
+    # print(transaction.to_json())   #prints transaction in readable format using toJason()
     #
     # testing if sig works
     #
     # wallet = Wallet() #must import Wallet
-    # signature = wallet.sign(transaction.toJson()) #sing trans in a jason format, returns a sign
+    # signature = wallet.sign(transaction.to_json()) #sing trans in a jason format, returns a sign
     #
     # transaction.sign(signature)  #gives false transaction verification (it should be true)
-    # print(transaction.toJson())
+    # print(transaction.to_json())
     #
     # validate signature
-    # signatureValid = Wallet.signatureValid(transaction.payload(), transaction.signature, wallet.publicKeyString())
-    # print(signatureValid)
+    # signature_valid = Wallet.signature_valid(transaction.payload(), transaction.signature, wallet.public_key_string())
+    # print(signature_valid)
 
     # ---------------------------------
 
@@ -43,15 +43,15 @@ if __name__ == '__main__':
 
     pool = TransactionPool() #create transaction pool
 
-    transaction = wallet.createTransaction(receiver, amount, type) #create transaction
+    transaction = wallet.create_transaction(receiver, amount, type) #create transaction
     print("--------------------------------------------------")
     #print(transaction.toJpason())
     print(transaction.payload())
 
     # validate signature - 1  (intro/basic method)
-    # signatureValid = Wallet.signatureValid(transaction.payload(), transaction.signature, wallet.publicKeyString())
-    # signatureValid = Wallet.signatureValid(transaction.payload(), transaction.signature, fraudulentWallet.publicKeyString()) #to test fake wallet
-    # print(signatureValid)
+    # signature_valid = Wallet.signature_valid(transaction.payload(), transaction.signature, wallet.public_key_string())
+    # signature_valid = Wallet.signature_valid(transaction.payload(), transaction.signature, fraudulentWallet.public_key_string()) #to test fake wallet
+    # print(signature_valid)
 
     #to check if it detects duplicate transaction, only one must be in the transaction pool
     if pool.transaction_exists(transaction) == False:
@@ -67,59 +67,59 @@ if __name__ == '__main__':
     print("--------------------------------------------------")
     print("Creating blockchain object")
     #Create a blockchain as an object
-    blockchain = Blockchain()
+    blockchain = MKDBlockchain()
 
     print("--------------------------------------------------")
-    print("Getting lastHash from the blockchain")
-    #get the lastHash in the blockchain
-    lastHash = BlockchainUtils.hash(blockchain.blocks[-1].payload()).hexdigest() #we first hash the blockchain, get lastHash in binary, trasfer it to hex format. must import BlockchainUtils class,
-    print("lastHash = ", lastHash)
+    print("Getting last_hash from the blockchain")
+    #get the last_hash in the blockchain
+    lastHash = BlockchainUtils.hash(blockchain.blocks[-1].payload()).hexdigest() #we first hash the blockchain, get last_hash in binary, trasfer it to hex format. must import BlockchainUtils class,
+    print("last_hash = ", lastHash)
 
 
     print("--------------------------------------------------")
-    print("Calculating the new blockCount by accessing the last blockCount in the blockchain")
-    #Calculating the new blockCount by accessing the last blockCount in the blockchain
+    print("Calculating the new block_count by accessing the last block_count in the blockchain")
+    #Calculating the new block_count by accessing the last block_count in the blockchain
     blockCount = blockchain.blocks[-1].blockCount + 1 
-    #blockCount = blockchain.blocks[-1].blockCount + 3333 #to test what happen if BlockCount is not valid
-    print("previous blockCount = ", blockchain.blocks[-1].blockCount, " new blockCount = ",blockCount)
+    #block_count = blockchain.blocks[-1].block_count + 3333 #to test what happen if BlockCount is not valid
+    print("previous block_count = ", blockchain.blocks[-1].blockCount, " new block_count = ",blockCount)
 
     print("--------------------------------------------------")
-    print("Creating a blcok and adding it to the blockchain")
-    block = wallet.createBlock(pool.transactions, lastHash, blockCount)
+    print("Creating a block and adding it to the blockchain")
+    block = wallet.create_block(pool.transactions, lastHash, blockCount)
     
 
 
     #test to create randome block
-    #block = Block(pool.transactions, 'lastHash', 'forger', 1) #random (lastHash,forger,blockCount) because no consensus,lastHash etc
+    #block = Block(pool.transactions, 'last_hash', 'forger', 1) #random (last_hash,forger,block_count) because no consensus,last_hash etc
 
     #print("--------------------------------------------------")
-    #print("Block as Jason represntation = ",block.toJson())
+    #print("Block as Jason represntation = ",block.to_json())
 
     #test to create randome block
-    #block = wallet.createBlock(pool.transactions, 'lastHash', 1) # random lastHash,blockCount. not set yet only for test
+    #block = wallet.create_block(pool.transactions, 'last_hash', 1) # random last_hash,block_count. not set yet only for test
 
 
     print("--------------------------------------------------")
-    pprint.pprint(block.toJson())
+    pprint.pprint(block.to_json())
 
     #validate signature - 2  (proper method)
-    signatureValid = Wallet.signatureValid(block.payload(), block.signature, wallet.publicKeyString()) #test valid wallet
-    #signatureValid = Wallet.signatureValid(block.payload(), block.signature, fraudulentWallet.publicKeyString()) #test invalid wallet
+    signatureValid = Wallet.signature_valid(block.payload(), block.signature, wallet.public_key_string()) #test valid wallet
+    #signature_valid = Wallet.signature_valid(block.payload(), block.signature, fraudulentWallet.public_key_string()) #test invalid wallet
     print("--------------------------------------------------")
     print("Signature validity is ",signatureValid)    
 
 
-    if not blockchain.lastBlockHashValid(block):
-        print('lastBlockHash is not valid')
+    if not blockchain.last_block_hash_valid(block):
+        print('last_block_hash is not valid')
 
-    if not blockchain.blockCountValid(block):
+    if not blockchain.block_count_valid(block):
         print('BlockCount is not valid')
 
-    if blockchain.lastBlockHashValid(block) and blockchain.blockCountValid(block):
-        blockchain.addBlock(block)
+    if blockchain.last_block_hash_valid(block) and blockchain.block_count_valid(block):
+        blockchain.add_block(block)
 
     #add block to the blockchain
-    #blockchain.addBlock(block)
+    #blockchain.add_block(block)
     print("--------------------------------------------------")
     print("Full Blockchain = ")
-    pprint.pprint(blockchain.toJson())
+    pprint.pprint(blockchain.to_json())

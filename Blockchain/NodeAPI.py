@@ -24,13 +24,13 @@ class NodeAPI(FlaskView):
 
     @route('/blockchain', methods=['GET'])
     def blockchain(self):
-        return node.blockchain.toJson(), 200
+        return node.blockchain.to_json(), 200
 
     @route('/transactionPool', methods=['GET'])
     def transactionPool(self):
         transactions = {}
         for ctr, transaction in enumerate(node.transactionPool.transactions):
-            transactions[ctr] = transaction.toJson()
+            transactions[ctr] = transaction.to_json()
         return jsonify(transactions), 200
 
     @route('/transaction', methods=['POST'])

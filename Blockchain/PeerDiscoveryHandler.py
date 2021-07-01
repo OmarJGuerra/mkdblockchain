@@ -42,7 +42,7 @@ class PeerDiscoveryHandler():
         return encodedMessage
 
     def handleMessage(self, message):
-        peersSocketConnector = message.senderConnector
+        peersSocketConnector = message.sender_connector
         peersPeerList = message.data
         newPeer = True
         for peer in self.socketCommunication.peers:

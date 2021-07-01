@@ -3,19 +3,19 @@ import json
 import jsonpickle
 
 
-class BlockchainUtils():
+class BlockchainUtils:
 
     @staticmethod
     def hash(data):
-        dataString = json.dumps(data)
-        dataBytes = dataString.encode('utf-8')
-        dataHash = SHA1.new(dataBytes)
-        return dataHash
+        data_string = json.dumps(data)
+        data_bytes = data_string.encode('utf-8')
+        data_hash = SHA1.new(data_bytes)
+        return data_hash
 
     @staticmethod
-    def encode(objectToEncode):
-        return jsonpickle.encode(objectToEncode, unpicklable=True)
+    def encode(object_to_encode):
+        return jsonpickle.encode(object_to_encode, unpicklable=True)
 
     @staticmethod
-    def decode(encodedObject):
-        return jsonpickle.decode(encodedObject)
+    def decode(encoded_object):
+        return jsonpickle.decode(encoded_object)

@@ -31,19 +31,19 @@ class SocketCommunication(Node):
 
     def node_message(self, connected_node, message):
         message = BlockchainUtils.decode(json.dumps(message))
-        if message.messageType == 'DISCOVERY':
+        if message.message_type == 'DISCOVERY':
             self.peerDiscoveryHandler.handleMessage(message)
-        elif message.messageType == 'TRANSACTION':
+        elif message.message_type == 'TRANSACTION':
             transaction = message.data
-            self.node.handleTransaction(transaction)
-        elif message.messageType == 'BLOCK':
+            self.node.handle_transaction(transaction)
+        elif message.message_type == 'BLOCK':
             block = message.data
-            self.node.handleBlock(block)
-        elif message.messageType == 'BLOCKCHAINREQUEST':
-            self.node.handleBlockchainRequest(connected_node)
-        elif message.messageType == 'BLOCKCHAIN':
+            self.node.handle_block(block)
+        elif message.message_type == 'BLOCKCHAINREQUEST':
+            self.node.handle_blockchain_request(connected_node)
+        elif message.message_type == 'BLOCKCHAIN':
             blockchain = message.data
-            self.node.handleBlockchain(blockchain)
+            self.node.handle_blockchain(blockchain)
 
     def send(self, receiver, message):
         self.send_to_node(receiver, message)

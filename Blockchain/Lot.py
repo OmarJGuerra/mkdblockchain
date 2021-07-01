@@ -1,14 +1,14 @@
 from BlockchainUtils import BlockchainUtils
 
 
-class Lot():
-    def __init__(self, publicKey, iteration, lastBlockHash):
-        self.publicKey = str(publicKey)
+class Lot:
+    def __init__(self, public_key, iteration, last_block_hash):
+        self.public_key = str(public_key)
         self.iteration = iteration
-        self.lastBlockHash = str(lastBlockHash)
+        self.last_block_hash = str(last_block_hash)
 
-    def lotHash(self):
-        hashData = self.publicKey + self.lastBlockHash
+    def lot_hash(self):
+        hash_data = self.public_key + self.last_block_hash
         for _ in range(self.iteration):
-            hashData = BlockchainUtils.hash(hashData).hexdigest()
-        return hashData
+            hash_data = BlockchainUtils.hash(hash_data).hexdigest()
+        return hash_data
