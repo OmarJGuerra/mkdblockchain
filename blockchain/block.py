@@ -2,13 +2,15 @@ import time
 import copy
 
 
-class Block:
-    # def __init__(self, transactions, last_hash, x, y, forger, block_count):
-    def __init__(self, transactions, last_hash, node_id, x, y, forger, block_count):
+# Block class temporarily inherits dict to make JSON serialization easy.
+# Should be changed to be more robust at a later time.
+class Block(dict):
+    # def __init__(self, transactions, parent_hash, x, y, forger, block_count):
+    def __init__(self, transactions, parent_hash, node_id, x, y, forger, block_count):
+        dict.__init__(self)
         # self.block_count = block_count
         self.transactions = transactions
-        self.last_hash = last_hash
-        # self.lastBlock = lastBlock
+        self.parent_hash = parent_hash
         self.coords = [node_id, x, y, time.time()]
         # self.x = x
         # self.y = y
@@ -27,15 +29,14 @@ class Block:
         return len(self.coords)
 
     @staticmethod
-    def genesis():
+    def genesis(genesis_node_id):
         # TODO: change genesis hash
-        genesis_block = Block([], '0', 'genesis', x=0, y=0, forger=None, block_count=1)
-        genesis_block[2] = 0
+        genesis_block = Block([], '0', genesis_node_id, x=0, y=0, forger=None, block_count=1)
         # genesis_block.timestamp = 0
         return genesis_block
 
     def to_json(self):
-        data = {'last_hash': self.last_hash,
+        data = {'parent_hash': self.parent_hash,
                 'signature': self.signature,
                 'forger': self.forger}
         # data['block_count'] = self.block_count

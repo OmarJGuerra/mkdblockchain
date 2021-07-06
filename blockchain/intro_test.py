@@ -69,10 +69,10 @@ if __name__ == '__main__':
     blockchain = MKDBlockchain()
 
     print("--------------------------------------------------")
-    print("Getting last_hash from the blockchain")
-    #get the last_hash in the blockchain
-    lastHash = BlockchainUtils.hash(blockchain.blocks[-1].payload()).hexdigest() #we first hash the blockchain, get last_hash in binary, trasfer it to hex format. must import BlockchainUtils class,
-    print("last_hash = ", lastHash)
+    print("Getting parent_hash from the blockchain")
+    #get the parent_hash in the blockchain
+    lastHash = BlockchainUtils.hash(blockchain.blocks[-1].payload()).hexdigest() #we first hash the blockchain, get parent_hash in binary, trasfer it to hex format. must import BlockchainUtils class,
+    print("parent_hash = ", lastHash)
 
 
     print("--------------------------------------------------")
@@ -89,13 +89,13 @@ if __name__ == '__main__':
 
 
     #test to create randome block
-    #block = Block(pool.transactions, 'last_hash', 'forger', 1) #random (last_hash,forger,block_count) because no consensus,last_hash etc
+    #block = Block(pool.transactions, 'parent_hash', 'forger', 1) #random (parent_hash,forger,block_count) because no consensus,parent_hash etc
 
     #print("--------------------------------------------------")
     #print("Block as Jason represntation = ",block.to_json())
 
     #test to create randome block
-    #block = wallet.create_block(pool.transactions, 'last_hash', 1) # random last_hash,block_count. not set yet only for test
+    #block = wallet.create_block(pool.transactions, 'parent_hash', 1) # random parent_hash,block_count. not set yet only for test
 
 
     print("--------------------------------------------------")
@@ -108,13 +108,13 @@ if __name__ == '__main__':
     print("Signature validity is ",signatureValid)    
 
 
-    if not blockchain.last_block_hash_valid(block):
+    if not blockchain.parent_block_hash_valid(block):
         print('last_block_hash is not valid')
 
     if not blockchain.block_count_valid(block):
         print('BlockCount is not valid')
 
-    if blockchain.last_block_hash_valid(block) and blockchain.block_count_valid(block):
+    if blockchain.parent_block_hash_valid(block) and blockchain.block_count_valid(block):
         blockchain.add_block(block)
 
     #add block to the blockchain

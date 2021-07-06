@@ -5,11 +5,14 @@ from proof_of_stake import ProofOfStake
 from mkdtree import kdtree
 
 
+BLOCKCHAIN_DIMENSIONS = 4
+GENESIS_NODE_ID = 40
+
 # TODO: link code so that blockchain is treated as mkd tree
 class MKDBlockchain:
     def __init__(self):
-        self.blocks = kdtree.KDNode(Block.genesis(), left=None, right=None, axis=0)
-        # self.blocks = kdtree.KDNode
+        # self.blocks = kdtree.KDNode(Block.genesis(), left=None, right=None, axis=0, sel_axis=1, )
+        self.blocks = kdtree.create_root(BLOCKCHAIN_DIMENSIONS, GENESIS_NODE_ID)
         self.account_model = AccountModel()
         self.pos = ProofOfStake()
 
@@ -17,7 +20,7 @@ class MKDBlockchain:
         self.execute_transactions(block.transactions)
         self.blocks.add(block)
         print('block add successful')
-        # self.blocks.append(block)
+        # self.blocks.append(block)03
 
     # modified loop to traverse the tree in order
     def to_json(self):
@@ -35,7 +38,7 @@ class MKDBlockchain:
         else:
             return False
 
-    def last_block_hash_valid(self, block):
+    def parent_block_hash_valid(self, block):
         latest_blockchain_block_hash = BlockchainUtils.hash(
             self.blocks[-1].payload()).hexdigest()
         if latest_blockchain_block_hash == block.last_hash:
@@ -82,9 +85,9 @@ class MKDBlockchain:
             self.account_model.update_balance(receiver, amount)
 
     def next_forger(self):
-        last_block_hash = BlockchainUtils.hash(
-            self.blocks[-1].payload()).hexdigest()
-        next_forger = self.pos.forger(last_block_hash)
+        parent_block_hash = BlockchainUtils.hash(
+            self.blocks.latest_point.payload()).hexdigest()
+        next_forger = self.pos.forger(parent_block_hash)
         return next_forger
 
     # TODO: Implement kdtree version of parent hash - replace indexing with tree traversal
@@ -92,8 +95,7 @@ class MKDBlockchain:
         covered_transactions = self.get_covered_transaction_set(
             transactions_from_pool)
         self.execute_transactions(covered_transactions)
-        new_block = forger_wallet.create_block(
-            covered_transactions, BlockchainUtils.hash(self.blocks[-1].payload()).hexdigest(), len(self.blocks))
+        new_block = forger_wallet.create_block(covered_transactions, len(self.blocks), 9)
         self.blocks.add(new_block)
         return new_block
 

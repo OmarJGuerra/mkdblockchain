@@ -1,3 +1,5 @@
+import random
+
 from Crypto.PublicKey import RSA
 from transaction import Transaction
 from block import Block
@@ -44,8 +46,8 @@ class Wallet:
         return transaction
 
     def create_block(self, transactions, last_hash, block_count):
-        block = Block(transactions, last_hash,
-                      self.public_key_string(), block_count)
+        block = Block(transactions, last_hash, self.public_key_string(),
+                      x=random.randint(0, 1000), y=random.randint(0, 1000), forger=None, block_count=block_count)
         signature = self.sign(block.payload())
         block.sign(signature)
         return block

@@ -4,10 +4,10 @@ class AccountModel:
         self.accounts = []
         self.balances = {}
 
-    def add_account(self, publicKeyString):
-        if not publicKeyString in self.accounts:
-            self.accounts.append(publicKeyString)
-            self.balances[publicKeyString] = 0
+    def add_account(self, public_key_string):
+        if public_key_string not in self.accounts:
+            self.accounts.append(public_key_string)
+            self.balances[public_key_string] = 0
 
     def get_balance(self, public_key_string):
         if public_key_string not in self.accounts:

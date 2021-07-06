@@ -46,6 +46,10 @@ class Node:
         else:
             self.handle_transaction(arg)
 
+    # TODO: fix handlers to use publish instead of p2p
+    def publish(self, message):
+        pub.sendMessage(f'c{self.cluster_id}', message)
+
     def handle_transaction(self, transaction):
         data = transaction.payload()
         signature = transaction.signature
@@ -70,7 +74,7 @@ class Node:
         signature = block.signature
 
         block_count_valid = self.blockchain.block_count_valid(block)
-        last_block_hash_valid = self.blockchain.last_block_hash_valid(block)
+        last_block_hash_valid = self.blockchain.parent_block_hash_valid(block)
         forger_valid = self.blockchain.forger_valid(block)
         transactions_valid = self.blockchain.transactions_valid(
             block.transactions)

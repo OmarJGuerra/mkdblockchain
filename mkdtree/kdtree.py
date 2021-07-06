@@ -16,6 +16,8 @@ import operator
 import math
 from collections import deque
 from functools import wraps
+from blockchain import block
+from blockchain.blockchain_utils import BlockchainUtils as BU
 
 __author__ = u'Stefan Kögl <stefan@skoegl.net>'
 __version__ = '0.16'
@@ -23,7 +25,7 @@ __website__ = 'https://github.com/stefankoegl/kdtree'
 __license__ = 'ISC license'
 
 
-class Node(object):
+class Node(dict, object):
     """
     A Node in a kd-tree.
 
@@ -171,7 +173,7 @@ class Node(object):
             return self.data == other.data
 
     def __hash__(self):
-        return hash(self.data)
+        return BU.hash(self.data)
 
 
 def require_axis(f):
@@ -179,7 +181,7 @@ def require_axis(f):
     @wraps(f)
     def _wrapper(self, *args, **kwargs):
         if None in (self.axis, self.sel_axis):
-            raise ValueError('%(func_name) requires the node %(node)s '
+            raise ValueError('%(func_name) rrequires the node %(node)s '
                              'to have an axis and a sel_axis function' %
                              dict(func_name=f.__name__, node=repr(self)))
 
@@ -192,7 +194,7 @@ class KDNode(Node):
     """A Node that contains kd-tree specific data and methods."""
 
     def __init__(self, data=None, left=None, right=None, axis=None,
-                 sel_axis=None, dimensions=None, st_hash=None):
+                 sel_axis=None, dimensions=None, latest_point=None, st_hash=None):
         """
         Creates a new node for a kd-tree.
 
@@ -209,24 +211,34 @@ class KDNode(Node):
         self.dimensions = dimensions
         self.size = 0
         self.st_hash = st_hash
-        self.latest_node = self
-        if left is None and right is None:
-            self.subtree_hash = hash(self.data)
+        if latest_point is not None:
+            self.latest_point = latest_point
         else:
-            self.subtree_hash = hash(left) if right is None \
-                else hash(right) if left is None \
-                else hash(hash(left) + (hash(right)))
+            self.latest_point = self
+        if left is None and right is None:
+            self.subtree_hash = BU.hash(self.data)
+        else:
+            self.subtree_hash = BU.hash(left) if right is None \
+                else BU.hash(right) if left is None \
+                else BU.hash(BU.hash(left) + BU.hash(right))
 
     def to_json(self):
-        data = {'axis': self.axis, 'sel_axis': self.sel_axis,
+        j_data = {'axis': self.axis,
                 'dimensions': self.dimensions, 'size': self.size,
                 'subtree_hash': self.subtree_hash}
 
         json_transactions = []
         for t in self.data.transactions:
             json_transactions.append(t.toJSon())
-        data['transactions'] = json_transactions
-        return data
+        j_data['transactions'] = json_transactions
+        return j_data
+
+    def __len__(self):
+        i = 0
+        for b in self.inorder():
+            i += 1
+        return i
+
 
     @require_axis
     def add(self, point):
@@ -240,41 +252,41 @@ class KDNode(Node):
         while True:
             check_dimensionality([point], dimensions=current.dimensions)
             if self.data[0] == 'genesis':
-                self.latest_node = point
+                self.latest_point = point
             # Adding has hit an empty leaf-node, add here
             if current.data is None:
                 # we need to build a new point to include parent hash
                 # point = item(x,y,z,payload,phash)
                 current.data = point
-                current.subtree_hash = hash(current.data)
+                current.subtree_hash = BU.hash(current.data)
                 return current
 
             # split on self.axis, recurse either left or right
-            if point[current.axis] < current.data[current.axis]:
-                right_hash = hash(current.right.subtree_hash) if current.right is not None else ''
+            if int(point[current.axis]) < int(current.data[current.axis]):
+                right_hash = BU.hash(current.right.subtree_hash) if current.right is not None else BU.hash(None)
                 if current.left is None:
                     current.left = current.create_subnode(point)
-                    current.subtree_hash = hash(hash(current.left) + right_hash)
+                    current.subtree_hash = BU.hash(BU.hash(current.left).hexdigest() + right_hash.hexdigest())
                     # print("parent = ",current.data.data)
                     current.size += 1
                     return current.left
                 else:
                     # print("parent = ",current.data.data)
-                    current.subtree_hash = hash(hash(current.left) + right_hash)
+                    current.subtree_hash = BU.hash(BU.hash(current.left).hexdigest() + right_hash.hexdigest())
                     # print("parent = ",current.data.data)
                     current.size += 1
                     current = current.left
             else:
-                left_hash = hash(current.left) if current.left is not None else ''
+                left_hash = BU.hash(current.left) if current.left is not None else BU.hash(None)
                 if current.right is None:
                     current.right = current.create_subnode(point)
-                    current.subtree_hash = hash(left_hash + hash(current.right))
+                    current.subtree_hash = BU.hash(left_hash.hexdigest() + BU.hash(current.right).hexdigest())
                     # print("parent = ",current.data.data)
                     current.size += 1
                     return current.right
                 else:
                     # print("parent = ",current.data.data)
-                    current.subtree_hash = hash(left_hash + hash(current.right))
+                    current.subtree_hash = BU.hash(left_hash.hexdigest() + BU.hash(current.right).hexdigest())
                     current = current.right
 
     @require_axis
@@ -648,17 +660,19 @@ def create(point_list=None, dimensions=None, axis=0, sel_axis=None):
     # loc.block.point_list = point_list
 
     if left.data is None and right.data is None:
-        hashed = hash(loc)
+        hashed = BU.hash(loc)
     else:
-        hashed = hash(left.data) if right is None \
-            else hash(right.data) if left is None \
-            else hash(hash(left.data) + hash(right.data))
+        hashed = BU.hash(left.data) if right is None \
+            else BU.hash(right.data) if left is None \
+            else BU.hash(BU.hash(left.data) + BU.hash(right.data))
 
     return KDNode(loc, left, right, axis=axis, sel_axis=sel_axis, dimensions=dimensions, st_hash=hashed)
 
 
-def create_root(genesis_data):
-    return KDNode(genesis_data, axis=0, )
+def create_root(dimensions, genesis_node_id, sel_axis=None):
+    sel_axis = sel_axis or (lambda prev_axis: (prev_axis + 1) % dimensions)
+    g_block = block.Block.genesis(genesis_node_id)
+    return KDNode(g_block, left=None, right=None, axis=0, sel_axis=sel_axis, latest_point=g_block, st_hash='0')
 
 
 def check_dimensionality(point_list, dimensions=None):
