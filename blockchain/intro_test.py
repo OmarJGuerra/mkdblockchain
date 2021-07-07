@@ -117,6 +117,54 @@ if __name__ == '__main__':
     if blockchain.parent_block_hash_valid(block) and blockchain.block_count_valid(block):
         blockchain.add_block(block)
 
+    # then = time.time_ns()
+    # for i in range(0,100):
+    #     block.Block([], '0', i, random.randint(0, 1000), random.randint(0, 1000), 0, i)
+    # now = time.time_ns() - then
+    # print(f'100 iterations: {now}')
+    #
+    # then = time.time_ns()
+    # for i in range(0,1000):
+    #     block.Block([], '0', i, random.randint(0, 1000), random.randint(0, 1000), 0, i)
+    # now = time.time_ns() - then
+    # print(f'1000 iterations: {now}')
+    #
+    # then = time.time_ns()
+    # for i in range(0,100000):
+    #     block.Block([], '0', i, random.randint(0, 1000), random.randint(0, 1000), 0, i)
+    # now = time.time_ns() - then
+    # print(f'100000 iterations: {now}')
+    #
+    # then = time.time_ns()
+    # for i in range(0,1000000):
+    #     block.Block([], '0', i, random.randint(0, 1000), random.randint(0, 1000), 0, i)
+    # now = time.time_ns() - then
+    # print(f'1000000 iterations: {now}')
+    #
+    # then = time.time_ns()
+    # for i in range(0,1000000000):
+    #     block.Block([], '0', i, random.randint(0, 1000), random.randint(0, 1000), 0, i)
+    # now = time.time_ns() - then
+    # print(f'100000000 iterations: {now}')
+    #
+    # then = time.time_ns()
+    # for i in range(0,1000000000):
+    #     block.Block([], '0', i, random.randint(0, 1000), random.randint(0, 1000), 0, i)
+    # now = time.time_ns() - then
+    # print(f'1000000000 iterations: {now}')
+    #
+    # then = time.time_ns()
+    # for i in range(0,1000000000):
+    #     block.Block([], '0', i, random.randint(0, 1000), random.randint(0, 1000), 0, i)
+    # now = time.time_ns() - then
+    # print(f'10000000000 iterations: {now}')
+    #
+    # then = time.time_ns()
+    # for i in range(0,1000000000):
+    #     block.Block([], '0', i, random.randint(0, 1000), random.randint(0, 1000), 0, i)
+    # now = time.time_ns() - then
+    # print(f'100000000000 iterations: {now}')
+
     #add block to the blockchain
     #blockchain.add_block(block)
     print("--------------------------------------------------")
