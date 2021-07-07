@@ -46,6 +46,10 @@ class Node:
         else:
             self.handle_transaction(arg)
 
+    def move_listener(self, old_topic, new_topic):
+        pub.unsubscribe(self.node_listener, old_topic)  # core.TopicManager.getTopicsSubscribed(listener))
+        pub.subscribe(self.node_listener, new_topic)
+
     # TODO: fix handlers to use publish instead of p2p
     def publish(self, message):
         pub.sendMessage(f'c{self.cluster_id}', message)
