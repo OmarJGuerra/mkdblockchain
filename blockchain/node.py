@@ -33,8 +33,8 @@ class Node:
     #     self.api.injectNode(self)
     #     self.api.start(apiPort)
 
-    def start_listener(self, cluster):
-        pub.subscribe(self.node_listener, cluster)
+    def start_listener(self, cluster_topic):
+        pub.subscribe(self.node_listener, cluster_topic)
 
     def node_listener(self, arg):
         print(f'Received payload: {arg}')
