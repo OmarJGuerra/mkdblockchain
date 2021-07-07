@@ -5,14 +5,11 @@ from proof_of_stake import ProofOfStake
 from mkdtree import kdtree
 
 
-BLOCKCHAIN_DIMENSIONS = 4
-GENESIS_NODE_ID = 40
-
 # TODO: link code so that blockchain is treated as mkd tree
 class MKDBlockchain:
-    def __init__(self):
+    def __init__(self, dimensions, gnode_id):
         # self.blocks = kdtree.KDNode(Block.genesis(), left=None, right=None, axis=0, sel_axis=1, )
-        self.blocks = kdtree.create_root(BLOCKCHAIN_DIMENSIONS, GENESIS_NODE_ID)
+        self.blocks = kdtree.create_root(dimensions, gnode_id)
         self.account_model = AccountModel()
         self.pos = ProofOfStake()
 
