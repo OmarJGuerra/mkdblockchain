@@ -18,7 +18,7 @@ class Node:
         self.node_id = node_id
         self.cluster_id = cluster_id
         # self.port = port
-        self.blockchain = MKDBlockchain()
+        self.blockchain = None
         self.transaction_pool = TransactionPool()
         self.wallet = Wallet()
         if key is not None:
