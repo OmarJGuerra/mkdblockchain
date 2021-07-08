@@ -40,13 +40,10 @@ class Node:
         print(f'c{self.node_id} received payload: {arg}')
         t = type(arg)
         if t is Block:
-            print('type block', type(arg))
             self.handle_block(arg)
         elif t is MKDBlockchain:
-            print('type mkdblockchain', type(arg))
             self.handle_blockchain(arg)
         else:
-            print('type else', type(arg))
             self.handle_transaction(arg)
 
     def move_listener(self, old_topic, new_topic):
@@ -100,11 +97,11 @@ class Node:
                           'BLOCKCHAIN', self.blockchain)
         self.p2p.send(requesting_node, BlockchainUtils.encode(message))
 
-    # TODO: Fix the damn function
+    # TODO: Possibly add some of the old functionality back if needed.
     def handle_blockchain(self, blockchain):
-        print(blockchain)
-        print(len(blockchain.blocks))
-        for block in blockchain.blocks.inorder():
+        if len(blockchain.blocks) == 1:
+            self.blockchain = blockchain
+        """for block in blockchain.blocks.inorder():
             print(block)
         local_blockchain_copy = copy.deepcopy(self.blockchain)
         print(local_blockchain_copy)
@@ -118,7 +115,7 @@ class Node:
                 if block_number >= local_block_count:
                     local_blockchain_copy.add_block(block)
                     self.transaction_pool.remove_from_pool(block.transactions)
-            self.blockchain = local_blockchain_copy
+            self.blockchain = local_blockchain_copy"""
 
     # TODO: Modify forger (remove extraneous operations, add necessary behavior)
     def forge(self):
