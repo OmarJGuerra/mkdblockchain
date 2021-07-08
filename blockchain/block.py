@@ -30,7 +30,6 @@ class Block(dict):
 
     @staticmethod
     def genesis(genesis_node_id, forger):
-        # TODO: change genesis hash
         genesis_block = Block([], '0', genesis_node_id, x=0, y=0, forger=forger)
         # genesis_block.timestamp = 0
         return genesis_block

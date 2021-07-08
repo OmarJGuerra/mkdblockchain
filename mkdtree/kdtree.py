@@ -237,7 +237,7 @@ class KDNode(Node):
 
 
     @require_axis
-    def add(self, point):
+    def add(self, point):  # point refers to a block for our purposes
         """
         Adds a point to the current node or iteratively descends to one of its children.
 
@@ -247,8 +247,6 @@ class KDNode(Node):
         current = self
         while True:
             check_dimensionality([point], dimensions=current.dimensions)
-            if self.data[0] == 'genesis':
-                self.latest_point = point
             # Adding has hit an empty leaf-node, add here
             if current.data is None:
                 # we need to build a new point to include parent hash
