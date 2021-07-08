@@ -21,6 +21,7 @@ class Node:
         self.blockchain = None
         self.transaction_pool = TransactionPool()
         self.wallet = Wallet()
+        self.coords = [0.0, 0.0]
         if key is not None:
             self.wallet.from_key(key)
 
@@ -130,6 +131,13 @@ class Node:
             self.p2p.broadcast(BlockchainUtils.encode(message))
         else:
             print('i am not the forger')
+
+    # for use with the test file of predetermined forgers
+    #def quick_forge(self):
+     #   forger = self.wallet
+      #  block =
+
+
 
     def request_chain(self):
         message = Message(self.p2p.socketConnector, 'BLOCKCHAINREQUEST', None)

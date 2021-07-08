@@ -6,7 +6,7 @@ import copy
 # Should be changed to be more robust at a later time.
 class Block(dict):
     # def __init__(self, transactions, parent_hash, x, y, forger, block_count):
-    def __init__(self, transactions, parent_hash, node_id, x, y, forger, block_count):
+    def __init__(self, transactions, parent_hash, node_id, x, y, forger):
         dict.__init__(self)
         # self.block_count = block_count
         self.transactions = transactions
@@ -29,9 +29,9 @@ class Block(dict):
         return len(self.coords)
 
     @staticmethod
-    def genesis(genesis_node_id):
+    def genesis(genesis_node_id, forger):
         # TODO: change genesis hash
-        genesis_block = Block([], '0', genesis_node_id, x=0, y=0, forger=None, block_count=1)
+        genesis_block = Block([], '0', genesis_node_id, x=0, y=0, forger=forger)
         # genesis_block.timestamp = 0
         return genesis_block
 

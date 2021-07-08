@@ -7,9 +7,9 @@ from mkdtree import kdtree
 
 # TODO: link code so that blockchain is treated as mkd tree
 class MKDBlockchain:
-    def __init__(self, dimensions, gnode_id):
+    def __init__(self, dimensions, gnode_id, genesis_forger):
         # self.blocks = kdtree.KDNode(Block.genesis(), left=None, right=None, axis=0, sel_axis=1, )
-        self.blocks = kdtree.create_root(dimensions, gnode_id)
+        self.blocks = kdtree.create_root(dimensions, gnode_id, genesis_forger)
         self.account_model = AccountModel()
         self.pos = ProofOfStake()
 
@@ -92,7 +92,11 @@ class MKDBlockchain:
         covered_transactions = self.get_covered_transaction_set(
             transactions_from_pool)
         self.execute_transactions(covered_transactions)
-        new_block = forger_wallet.create_block(covered_transactions, len(self.blocks), 9)
+
+        #need to generate parent_hash
+        #parent_hash =
+
+        new_block = forger_wallet.create_block(covered_transactions, len(self.blocks), parent_hash)
         self.blocks.add(new_block)
         return new_block
 

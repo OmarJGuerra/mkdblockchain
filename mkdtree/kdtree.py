@@ -194,16 +194,16 @@ class KDNode(Node):
     """A Node that contains kd-tree specific data and methods."""
 
     def __init__(self, data=None, left=None, right=None, axis=None,
-                 sel_axis=None, dimensions=None, latest_point=None, st_hash=None):
+                 sel_axis=None, dimensions=None, st_hash=None):
         """
         Creates a new node for a kd-tree.
 
         If the node will be used within a tree, the axis and the sel_axis
         function should be supplied.
-
         sel_axis(axis) is used when creating subnodes of the current node. It
         receives the axis of the parent node and returns the axis of the child
         node.
+
         """
         super(KDNode, self).__init__(data, left, right)
         self.axis = axis
@@ -211,10 +211,6 @@ class KDNode(Node):
         self.dimensions = dimensions
         self.size = 0
         self.st_hash = st_hash
-        if latest_point is not None:
-            self.latest_point = latest_point
-        else:
-            self.latest_point = self
         if left is None and right is None:
             self.subtree_hash = BU.hash(self.data)
         else:
@@ -669,10 +665,10 @@ def create(point_list=None, dimensions=None, axis=0, sel_axis=None):
     return KDNode(loc, left, right, axis=axis, sel_axis=sel_axis, dimensions=dimensions, st_hash=hashed)
 
 
-def create_root(dimensions, genesis_node_id, sel_axis=None):
+def create_root(dimensions, genesis_node_id, forger, sel_axis=None):
     sel_axis = sel_axis or (lambda prev_axis: (prev_axis + 1) % dimensions)
-    g_block = block.Block.genesis(genesis_node_id)
-    return KDNode(g_block, left=None, right=None, axis=0, sel_axis=sel_axis, latest_point=g_block, st_hash='0')
+    g_block = block.Block.genesis(genesis_node_id, forger)
+    return KDNode(g_block, left=None, right=None, axis=0, sel_axis=sel_axis, st_hash='0')
 
 
 def check_dimensionality(point_list, dimensions=None):
