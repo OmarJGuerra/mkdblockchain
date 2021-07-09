@@ -92,13 +92,13 @@ class MKDBlockchain:
         covered_transactions = self.get_covered_transaction_set(
             transactions_from_pool)
         self.execute_transactions(covered_transactions)
+        new_block = forger_wallet.create_block(covered_transactions, node_id)
 
-        #need to generate parent_hash
-        #parent_hash =
+        # check if we need add here or in separate function
 
-        new_block = forger_wallet.create_block(covered_transactions, len(self.blocks), parent_hash)
-        self.blocks.add(new_block)
-        return new_block
+        return_data = self.blocks.add(new_block)
+        parent_hash = return_data[1]
+        return new_block, parent_hash
 
     def transaction_exists(self, transaction):
         for block in self.blocks.inorder():

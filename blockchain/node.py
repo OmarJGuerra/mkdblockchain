@@ -132,11 +132,14 @@ class Node:
         else:
             print('i am not the forger')
 
-    # for use with the test file of predetermined forgers
-    #def quick_forge(self):
-     #   forger = self.wallet
-      #  block =
-
+    # function to feed in block data directly and test block addition to the mkd_blockchain
+    def test_forge(self):
+        print('I am the forger: ')
+        block_data = self.blockchain.create_block(self.transaction_pool.transactions, self.wallet, self.node_id)
+        self.transaction_pool.remove_from_pool(self.transaction_pool.transactions)
+        block = block_data[0]
+        block.parent_hash = block_data[1]
+        return block
 
 
     def request_chain(self):

@@ -6,7 +6,7 @@ import copy
 # Should be changed to be more robust at a later time.
 class Block(dict):
     # def __init__(self, transactions, parent_hash, x, y, forger, block_count):
-    def __init__(self, transactions, parent_hash, node_id, x, y, forger):
+    def __init__(self, transactions, node_id, x, y, forger, parent_hash=None):
         dict.__init__(self)
         # self.block_count = block_count
         self.transactions = transactions
@@ -30,7 +30,7 @@ class Block(dict):
 
     @staticmethod
     def genesis(genesis_node_id, forger):
-        genesis_block = Block([], '0', genesis_node_id, x=0, y=0, forger=forger)
+        genesis_block = Block([], genesis_node_id, x=0, y=0, forger=forger, parent_hash='0')
         # genesis_block.timestamp = 0
         return genesis_block
 
@@ -54,7 +54,9 @@ class Block(dict):
         return json_representation
 
     def __repr__(self):
-        return f'Block({self.coords}, {self.transactions})'
+        # return f'Block({self.coords}, {self.forger}, {self.parent_hash}, {self.transactions})'
+
+        return f'Block({self.coords}, {self.parent_hash}, {self.transactions})'
 
     def sign(self, signature):
         self.signature = signature
