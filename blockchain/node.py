@@ -138,7 +138,9 @@ class Node:
         block_data = self.blockchain.create_block(self.transaction_pool.transactions, self.wallet, self.node_id)
         self.transaction_pool.remove_from_pool(self.transaction_pool.transactions)
         block = block_data[0]
-        block.parent_hash = block_data[1]
+        # print(block_data[1].data.to_json())
+        #  TODO: Make parent hashing more efficient
+        block.parent_hash = BlockchainUtils.hash(block_data[1].data.to_json()).hexdigest()
         return block
 
 

@@ -258,24 +258,21 @@ class KDNode(Node):
             # print(f'current: {current}')
             # print(f'point: {type(point)}')
             # print(f'point: {point}')
-            print(f'point[{current.axis}] : {point[current.axis]}')
-            print(f'current.data[current.axis] : {current.data[current.axis]}')
+            # print(f'point[{current.axis}] : {point[current.axis]}')
+            # print(f'current.data[current.axis] : {current.data[current.axis]}')
 
             # TODO: Ensure integrity of Merkle hash
             # split on self.axis, recurse either left or right
             if int(point[current.axis]) < int(current.data[current.axis]):
                 right_hash = BU.hash(current.right) if current.right is not None else BU.hash(None)
                 if current.left is None:
-                    # TODO: Confirm what this is hashing vv
-                    parent_hash = BU.hash(current.data)
-
+                    parent = current
                     current.left = current.create_subnode(point)
                     current.subtree_hash = BU.hash(BU.hash(current.left).hexdigest() + right_hash.hexdigest())
                     # print("parent = ",current.data.data)
                     current.size += 1
-                    # TODO: Make parent hashing more efficient
                     # returning parent hash to be added in forger b/c it won't allow it's addition here
-                    return current.left, parent_hash.hexdigest()
+                    return current.left, parent
                 else:
                     # print("parent = ",current.data.data)
                     current.subtree_hash = BU.hash(BU.hash(current.left).hexdigest() + right_hash.hexdigest())
@@ -285,12 +282,12 @@ class KDNode(Node):
             else:
                 left_hash = BU.hash(current.left) if current.left is not None else BU.hash(None)
                 if current.right is None:
-                    parent_hash = BU.hash(current.data)
+                    parent = current
                     current.right = current.create_subnode(point)
                     current.subtree_hash = BU.hash(left_hash.hexdigest() + BU.hash(current.right).hexdigest())
                     # print("parent = ",current.data.data)
                     current.size += 1
-                    return current.right, parent_hash.hexdigest()
+                    return current.right, parent
                 else:
                     # print("parent = ",current.data.data)
                     current.subtree_hash = BU.hash(left_hash.hexdigest() + BU.hash(current.right).hexdigest())

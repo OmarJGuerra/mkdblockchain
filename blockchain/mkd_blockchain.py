@@ -97,8 +97,8 @@ class MKDBlockchain:
         # check if we need add here or in separate function
 
         return_data = self.blocks.add(new_block)
-        parent_hash = return_data[1]
-        return new_block, parent_hash
+        parent = return_data[1]
+        return new_block, parent
 
     def transaction_exists(self, transaction):
         for block in self.blocks.inorder():
