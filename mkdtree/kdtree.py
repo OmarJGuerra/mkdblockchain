@@ -241,7 +241,8 @@ class KDNode(Node):
         """
         Adds a point to the current node or iteratively descends to one of its children.
 
-        Re-hashes the relevant branch bottom-up when point is added.
+        # TODO: Need to implement method to Re-hash the relevant branch bottom-up when point is added.
+
         Users should call add() only to the topmost tree.
         """
         current = self
@@ -249,48 +250,27 @@ class KDNode(Node):
             check_dimensionality([point], dimensions=current.dimensions)
             # Adding has hit an empty leaf-node, add here
             if current.data is None:
-                # we need to build a new point to include parent hash
-                # point = item(x,y,z,payload,phash)
                 current.data = point
-                current.subtree_hash = BU.hash(current.data)
                 return current
-
-            # print(f'current: {current}')
-            # print(f'point: {type(point)}')
-            # print(f'point: {point}')
-            # print(f'point[{current.axis}] : {point[current.axis]}')
-            # print(f'current.data[current.axis] : {current.data[current.axis]}')
 
             # TODO: Ensure integrity of Merkle hash
             # split on self.axis, recurse either left or right
             if int(point[current.axis]) < int(current.data[current.axis]):
-                right_hash = BU.hash(current.right) if current.right is not None else BU.hash(None)
                 if current.left is None:
                     parent = current
                     current.left = current.create_subnode(point)
-                    current.subtree_hash = BU.hash(BU.hash(current.left).hexdigest() + right_hash.hexdigest())
-                    # print("parent = ",current.data.data)
                     current.size += 1
-                    # returning parent hash to be added in forger b/c it won't allow it's addition here
                     return current.left, parent
                 else:
-                    # print("parent = ",current.data.data)
-                    current.subtree_hash = BU.hash(BU.hash(current.left).hexdigest() + right_hash.hexdigest())
-                    # print("parent = ",current.data.data)
                     current.size += 1
                     current = current.left
             else:
-                left_hash = BU.hash(current.left) if current.left is not None else BU.hash(None)
                 if current.right is None:
                     parent = current
                     current.right = current.create_subnode(point)
-                    current.subtree_hash = BU.hash(left_hash.hexdigest() + BU.hash(current.right).hexdigest())
-                    # print("parent = ",current.data.data)
                     current.size += 1
                     return current.right, parent
                 else:
-                    # print("parent = ",current.data.data)
-                    current.subtree_hash = BU.hash(left_hash.hexdigest() + BU.hash(current.right).hexdigest())
                     current = current.right
 
     @require_axis
