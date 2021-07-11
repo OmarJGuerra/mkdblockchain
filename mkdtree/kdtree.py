@@ -245,12 +245,19 @@ class KDNode(Node):
 
         Users should call add() only to the topmost tree.
         """
+
+        traversed_blocks = [self]
+
         current = self
         while True:
             check_dimensionality([point], dimensions=current.dimensions)
             # Adding has hit an empty leaf-node, add here
             if current.data is None:
                 current.data = point
+
+                traversed_blocks.append(point)
+                print(f'Traversed block list: {traversed_blocks}')
+
                 return current
 
             # TODO: Ensure integrity of Merkle hash
@@ -264,6 +271,10 @@ class KDNode(Node):
                 else:
                     current.size += 1
                     current = current.left
+
+                    traversed_blocks.append(current)
+                    print(f'Traversed block list: {traversed_blocks}')
+
             else:
                 if current.right is None:
                     parent = current
@@ -272,6 +283,9 @@ class KDNode(Node):
                     return current.right, parent
                 else:
                     current = current.right
+
+                    traversed_blocks.append(current)
+                    print(f'Traversed block list: {traversed_blocks}')
 
     @require_axis
     def create_subnode(self, data):
