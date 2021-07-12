@@ -140,7 +140,9 @@ class Node:
         block = block_data[0]
         # print(block_data[1].data.to_json())
         #  TODO: Make parent hashing more efficient
-        block.parent_hash = BlockchainUtils.hash(block_data[1].data.to_json()).hexdigest()
+        block.parent_hash = BlockchainUtils.hash(block_data[1].to_json()).hexdigest()
+        # TODO: Move create subtree hash function here!!!
+        kdtree.create_subtreehash(block_data[2])
         return block
 
 

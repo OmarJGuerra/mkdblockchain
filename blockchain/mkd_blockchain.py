@@ -98,7 +98,8 @@ class MKDBlockchain:
 
         return_data = self.blocks.add(new_block)
         parent = return_data[1]
-        return new_block, parent
+        traversed_kdnodes = return_data[2]
+        return new_block, parent, traversed_kdnodes
 
     def transaction_exists(self, transaction):
         for block in self.blocks.inorder():

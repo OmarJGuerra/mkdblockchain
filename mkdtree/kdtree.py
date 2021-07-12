@@ -263,11 +263,12 @@ class KDNode(Node):
             # split on self.axis, recurse either left or right
             if int(point[current.axis]) < int(current.data[current.axis]):
                 if current.left is None:
-                    parent = current
+                    parent = current.data
                     current.left = current.create_subnode(point)
                     current.size += 1
-                    current.left.create_subtreehash(traversed_kdnodes)
-                    return current.left, parent
+                    traversed_kdnodes.append(current.left)
+                    print(f'Traversed kd Nodes: {traversed_kdnodes}')
+                    return current.left, parent, traversed_kdnodes
                 else:
                     current.size += 1
                     current = current.left
@@ -275,28 +276,17 @@ class KDNode(Node):
 
             else:
                 if current.right is None:
-                    parent = current
+                    parent = current.data
                     current.right = current.create_subnode(point)
                     current.size += 1
-                    current.right.create_subtreehash(traversed_kdnodes)
-                    return current.right, parent
+                    traversed_kdnodes.append(current.right)
+                    print(f'Traversed kd Nodes: {traversed_kdnodes}')
+                    return current.right, parent, traversed_kdnodes
                 else:
                     current = current.right
                     traversed_kdnodes.append(current)
 
 
-# TODO: Add time recording to collect data.
-    def create_subtreehash(self, traversed_kdnodes):
-        self.subtree_hash = BU.hash(self.data.to_json()).hexdigest()
-        for kdnode in reversed(traversed_kdnodes)
-            if kdnode.left is not None and kdnode.right is not None:
-                kdnode.subtree_hash = BU.hash(kdnode.left.subtree_hash + kdnode.right.subtree_hash).hexdigest()
-            elif kdnode.left is not None and kdnode.right is None:
-                kdnode.subtree_hash = kdnode.left.subtree_hash
-            elif kdnode.right is not None and kdnode.left is None:
-                kdnode.subtree_hash = kdnode.right.subtree_hash
-            else:
-                self.subtree_hash = BU.hash(self.data.to_json).hexdigest()
 
 
     @require_axis
@@ -623,6 +613,33 @@ class KDNode(Node):
             return None, None
 
         return sel_func(candidates, key=max_key)
+
+# TODO: Add time recording to collect data.
+# Want to change to create_subtree_hash or create_st_hash
+def create_subtreehash(traversed_kdnodes):
+    for kdnode in reversed(traversed_kdnodes):
+        if kdnode.left is not None and kdnode.right is not None:
+            print(f'Left: {kdnode.left.subtree_hash} Right: {kdnode.right.subtree_hash}')
+            kdnode.subtree_hash = concat_hashes(kdnode.left.subtree_hash, kdnode.right.subtree_hash)
+        elif kdnode.left is not None and kdnode.right is None:
+            print(f'Left: {kdnode.left.subtree_hash}')
+            kdnode.subtree_hash = kdnode.left.subtree_hash
+        elif kdnode.right is not None and kdnode.left is None:
+            print(f'Right: {kdnode.right.subtree_hash}')
+            kdnode.subtree_hash = kdnode.right.subtree_hash
+        else:
+            kdnode.subtree_hash = BU.hash(kdnode.data.to_json()).hexdigest()
+
+
+def concat_hashes(hash1, hash2):
+    return BU.hash(hash1 + hash2).hexdigest()
+
+
+def concat_hash_list(hashes):
+    concat = ''
+    for h in hashes:
+        concat += h
+    return BU.hash(concat).hexdigest()
 
 
 def create(point_list=None, dimensions=None, axis=0, sel_axis=None):
