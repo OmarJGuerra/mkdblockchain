@@ -285,6 +285,7 @@ class KDNode(Node):
                     traversed_kdnodes.append(current)
 
 
+# TODO: Add time recording to collect data.
     def create_subtreehash(self, traversed_kdnodes):
         self.subtree_hash = BU.hash(self.data.to_json()).hexdigest()
         for kdnode in reversed(traversed_kdnodes)
