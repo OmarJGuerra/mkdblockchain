@@ -212,11 +212,11 @@ class KDNode(Node):
         self.size = 0
         self.st_hash = st_hash
         if left is None and right is None:
-            self.subtree_hash = BU.hash(self.data)
+            self.subtree_hash = BU.hash(self.data).hexdigest()
         else:
-            self.subtree_hash = BU.hash(left) if right is None \
-                else BU.hash(right) if left is None \
-                else BU.hash(BU.hash(left) + BU.hash(right))
+            self.subtree_hash = BU.hash(left).hexdigest() if right is None \
+                else BU.hash(right).hexdigest() if left is None \
+                else BU.hash(BU.hash(left).hexdigest() + BU.hash(right)).hexdigest()
 
     def to_json(self):
         j_data = {'axis': self.axis,
@@ -246,18 +246,17 @@ class KDNode(Node):
         Users should call add() only to the topmost tree.
         """
 
-        traversed_blocks = [self]
 
         current = self
+        # print(f'current.left: {current.left} current.right: {current.right}')
+
+        traversed_kdnodes = [current]
+
         while True:
             check_dimensionality([point], dimensions=current.dimensions)
             # Adding has hit an empty leaf-node, add here
             if current.data is None:
                 current.data = point
-
-                traversed_blocks.append(point)
-                print(f'Traversed block list: {traversed_blocks}')
-
                 return current
 
             # TODO: Ensure integrity of Merkle hash
@@ -267,25 +266,37 @@ class KDNode(Node):
                     parent = current
                     current.left = current.create_subnode(point)
                     current.size += 1
+                    current.left.create_subtreehash(traversed_kdnodes)
                     return current.left, parent
                 else:
                     current.size += 1
                     current = current.left
-
-                    traversed_blocks.append(current)
-                    print(f'Traversed block list: {traversed_blocks}')
+                    traversed_kdnodes.append(current)
 
             else:
                 if current.right is None:
                     parent = current
                     current.right = current.create_subnode(point)
                     current.size += 1
+                    current.right.create_subtreehash(traversed_kdnodes)
                     return current.right, parent
                 else:
                     current = current.right
+                    traversed_kdnodes.append(current)
 
-                    traversed_blocks.append(current)
-                    print(f'Traversed block list: {traversed_blocks}')
+
+    def create_subtreehash(self, traversed_kdnodes):
+        self.subtree_hash = BU.hash(self.data.to_json()).hexdigest()
+        for kdnode in reversed(traversed_kdnodes)
+            if kdnode.left is not None and kdnode.right is not None:
+                kdnode.subtree_hash = BU.hash(kdnode.left.subtree_hash + kdnode.right.subtree_hash).hexdigest()
+            elif kdnode.left is not None and kdnode.right is None:
+                kdnode.subtree_hash = kdnode.left.subtree_hash
+            elif kdnode.right is not None and kdnode.left is None:
+                kdnode.subtree_hash = kdnode.right.subtree_hash
+            else:
+                self.subtree_hash = BU.hash(self.data.to_json).hexdigest()
+
 
     @require_axis
     def create_subnode(self, data):
@@ -722,7 +733,7 @@ def visualize(tree, max_level=100, node_width=10, left_padding=5):
 
         width = int(max_width * node_width / per_level)
 
-        node_str = (str(node.data) if node else '').center(width)
+        node_str = ((str(node.data) + ', ' + node.subtree_hash) if node else '').center(width)
         print(node_str, end=' ')
 
         in_level += 1
