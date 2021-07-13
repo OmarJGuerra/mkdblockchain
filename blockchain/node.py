@@ -1,5 +1,6 @@
 from mkd_blockchain import MKDBlockchain
 from transaction import Transaction
+from sensor_transaction import SensorTransaction
 from transaction_pool import TransactionPool
 from wallet import Wallet
 from socket_communication import SocketCommunication

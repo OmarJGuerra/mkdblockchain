@@ -303,19 +303,41 @@ class KDNode(Node):
                               dimensions=self.dimensions)
 
     @require_axis
+    def merge(self, other_tree):
+        merging_tree = other_tree if other_tree.size < self.size else self
+        merged_into_tree = other_tree if other_tree.size >= self.size else self
+
+        for kdn in merging_tree.inorder():
+            merged_into_tree.add_node(kdn)
+
+        return merged_into_tree
+
+    @require_axis
     def add_node(self, node):
-        if node.data[self.axis] < self.data[self.axis]:
-            if not self.left:
-                self.left = node
-                return self.left
+        """ Adds a node to the tree and re-hashes it. """
+        if node != self:
+            if node.data[self.axis] < self.data[self.axis]:
+                if not self.left:
+                    self.left = node
+                    self.left.st_hash = BU.hash(self.left.data).hexdigest()
+                    right_hash = self.right.st_hash if self.right is not None else ''
+                    self.st_hash = concat_hashes(self.left.st_hash, right_hash)
+                    self.left.data.parent_hash = BU.hash(self.data.to_json).hexdigest()
+                    return self.left
+                else:
+                    return self.left.add_node(node)
             else:
-                return self.left.add_node(node)
+                if not self.right:
+                    self.right = node
+                    self.right.st_hash = BU.hash(self.right.data.to_json).hexdigest()
+                    left_hash = self.left.st_hash if self.left is not None else ''
+                    self.st_hash = concat_hashes(left_hash, self.right.st_hash)
+                    self.right.data.parent_hash = BU.hash(self.data.to_json).hexdigest()
+                    return self.right
+                else:
+                    return self.right.add_node(node)
         else:
-            if not self.right:
-                self.right = node
-                return self.right
-            else:
-                return self.right.add_node(node)
+            print("Node already in tree")
 
     @require_axis
     def search(self, coordinates):

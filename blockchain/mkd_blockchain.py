@@ -102,9 +102,9 @@ class MKDBlockchain:
         return new_block, parent, traversed_kdnodes
 
     def transaction_exists(self, transaction):
-        for block in self.blocks.inorder():
-            for block_transaction in block.transactions:
-                if transaction.equals(block_transaction):
+        for node in self.blocks.inorder():
+            for block_transaction in node.data.transactions:
+                if transaction.id.equals(block_transaction.id):
                     return True
         return False
 
