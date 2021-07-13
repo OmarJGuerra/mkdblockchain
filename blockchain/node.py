@@ -45,6 +45,8 @@ class Node:
             self.handle_block(arg)
         elif t is MKDBlockchain:
             self.handle_blockchain(arg)
+        elif t is SensorTransaction:
+            self.handle_sensor_transaction(arg)
         else:
             self.handle_transaction(arg)
 
@@ -56,6 +58,18 @@ class Node:
     def publish(self, message):
         cluster = 'c'+str(self.cluster_id).strip()
         pub.sendMessage(cluster, arg=message)
+
+    # TODO: Verify function of handle_sensor_transaction
+    def handle_sensor_transaction(self, transaction):
+        data = transaction.payload()
+        signature = transaction.signature
+        signer_public_key = transaction.sender_public_key
+        signature_valid = Wallet.signature_valid(
+            data, signature, signer_public_key)
+        transaction_exists = self.transaction_pool.transaction_exists(transaction)
+        transaction_in_block = self.blockchain.transaction_exists(transaction)
+        if not transaction_exists and not transaction_in_block and signature_valid:
+            self.transaction_pool.add_transaction(transaction)
 
     def handle_transaction(self, transaction):
         data = transaction.payload()
@@ -134,7 +148,7 @@ class Node:
             print('i am not the forger')
 
     # function to feed in block data directly and test block addition to the mkd_blockchain
-    def test_forge(self):
+    def mkd_forge(self):
         print('I am the forger: ')
         block_data = self.blockchain.create_block(self.transaction_pool.transactions, self.wallet, self.node_id)
         self.transaction_pool.remove_from_pool(self.transaction_pool.transactions)
@@ -144,7 +158,8 @@ class Node:
         block.parent_hash = BlockchainUtils.hash(block_data[1].to_json()).hexdigest()
         # TODO: Move create subtree hash function here!!!
         kdtree.create_subtreehash(block_data[2])
-        return block
+        return block  # TODO: change return to just broadcast
+
 
 
     def request_chain(self):
