@@ -1,22 +1,20 @@
 import time
 import copy
+from blockchain_utils import BlockchainUtils as BU
 
 
 # Block class temporarily inherits dict to make JSON serialization easy.
 # Should be changed to be more robust at a later time.
 class Block(dict):
     # def __init__(self, transactions, parent_hash, x, y, forger, block_count):
-    def __init__(self, transactions, node_id, x, y, forger, parent_hash=None):
+    def __init__(self, transactions, node_id, x, y, forger, t=time.time(), parent_hash=None, signature=''):
         dict.__init__(self)
-        # self.block_count = block_count
+        # self.block_count = block
+        self.coords = [node_id, x, y, t]
         self.transactions = transactions
         self.parent_hash = parent_hash
-        self.coords = [node_id, x, y, time.time()]
-        # self.x = x
-        # self.y = y
-        # self.timestamp = time.time()
         self.forger = forger
-        self.signature = ''
+        self.signature = signature
 
     def __getitem__(self, item):
         return self.coords[item]
@@ -28,6 +26,16 @@ class Block(dict):
     def __len__(self):
         return len(self.coords)
 
+    def __repr__(self):
+        # return f'Block({self.coords}, {self.forger}, {self.parent_hash}, {self.transactions})'
+        return f'Block({self.coords}, {self.transactions},\n' \
+               f'{self.parent_hash},\n' \
+               f'{self.forger},\n' \
+               f'{self.signature})'
+
+    def __hash__(self):
+        return BU.hash(self)
+
     @staticmethod
     def genesis(genesis_node_id, forger):
         genesis_block = Block([], genesis_node_id, x=0, y=0, forger=forger, parent_hash='0')
@@ -35,9 +43,10 @@ class Block(dict):
         return genesis_block
 
     def to_json(self):
-        data = {'parent_hash': self.parent_hash,
+        data = {'coordinates': self.coords,
                 'signature': self.signature,
-                'forger': self.forger}
+                'parent_hash': self.parent_hash}
+
         # data['block_count'] = self.block_count
         # data['x'] = self.x
         # data['y'] = self.y
@@ -53,10 +62,6 @@ class Block(dict):
         json_representation['signature'] = ''
         return json_representation
 
-    def __repr__(self):
-        # return f'Block({self.coords}, {self.forger}, {self.parent_hash}, {self.transactions})'
-
-        return f'Block({self.coords}, {self.parent_hash}, {self.transactions})'
 
     def sign(self, signature):
         self.signature = signature

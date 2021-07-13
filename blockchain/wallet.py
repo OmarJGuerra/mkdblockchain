@@ -45,9 +45,9 @@ class Wallet:
         transaction.sign(signature)
         return transaction
 
-    def create_block(self, transactions, parent_hash):
-        block = Block(transactions, parent_hash, self.public_key_string(),
-                      x=random.randint(0, 1000), y=random.randint(0, 1000), forger=self)
+    def create_block(self, transactions, node_id):
+        block = Block(transactions, node_id,
+                      x=random.randint(0, 1000), y=random.randint(0, 1000), forger=self.public_key_string())
         signature = self.sign(block.payload())
         block.sign(signature)
         return block

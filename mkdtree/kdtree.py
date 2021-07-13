@@ -37,6 +37,9 @@ class Node(dict, object):
         self.left = left
         self.right = right
 
+    def __repr__(self):
+        return f'Node({self.data}, {self.left}, {self.right})'
+
     @property
     def is_leaf(self):
         """
@@ -235,6 +238,8 @@ class KDNode(Node):
             i += 1
         return i
 
+    def __repr__(self):
+        return f'KDNode({self.data}, {self.axis}, {self.dimensions}, {self.st_hash}'
 
     @require_axis
     def add(self, point):  # point refers to a block for our purposes
@@ -311,6 +316,30 @@ class KDNode(Node):
                 return self.right
             else:
                 return self.right.add_node(node)
+
+    @require_axis
+    def search(self, coordinates):
+        print(f'coords: {coordinates}, self: {self.data}')
+        if set(coordinates) == set(self.data):
+            return self
+        else:
+            if coordinates[self.axis] < self.data[self.axis]:
+                print(f'{coordinates[self.axis]} < {self.data[self.axis]}')
+                if self.left is not None:
+                    print(self.left.search(coordinates))
+                    return self.left.search(coordinates)
+                else:
+                    print('failed')
+                    return
+            else:
+                print(f'{coordinates[self.axis]} >= {self.data[self.axis]}')
+                if self.right is not None:
+                    print(self.right.search(coordinates))
+                    return self.right.search(coordinates)
+                else:
+                    print('failed')
+                    return
+
 
     @require_axis
     def find_replacement(self):
@@ -613,6 +642,7 @@ class KDNode(Node):
             return None, None
 
         return sel_func(candidates, key=max_key)
+
 
 # TODO: Add time recording to collect data.
 # Want to change to create_subtree_hash or create_st_hash

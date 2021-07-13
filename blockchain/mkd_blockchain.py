@@ -88,7 +88,7 @@ class MKDBlockchain:
         return next_forger
 
     # TODO: Implement kdtree version of parent hash - replace indexing with tree traversal
-    def create_block(self, transactions_from_pool, forger_wallet):
+    def create_block(self, transactions_from_pool, forger_wallet, node_id):
         covered_transactions = self.get_covered_transaction_set(
             transactions_from_pool)
         self.execute_transactions(covered_transactions)

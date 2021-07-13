@@ -8,6 +8,7 @@ from message import Message
 from block import Block
 from blockchain_utils import BlockchainUtils
 from pubsub import pub
+from mkdtree import kdtree
 import copy
 
 
