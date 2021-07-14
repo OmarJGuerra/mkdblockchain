@@ -114,10 +114,13 @@ class Node:
                           'BLOCKCHAIN', self.blockchain)
         self.p2p.send(requesting_node, BlockchainUtils.encode(message))
 
-    # TODO: Possibly add some of the old functionality back if needed.
+    # TODO: Need to add functionality for when blockchain is broadcast after merge and confirm function of deepcopy
     def handle_blockchain(self, blockchain):
-        if len(blockchain.blocks) == 1:
-            self.blockchain = blockchain
+        if len(blockchain.blocks) == 1 and self.blockchain.blocks is None:
+            self.blockchain = copy.deepcopy(blockchain)
+
+        # else new node that enters cluster broadcasts it
+
         """for block in blockchain.blocks.inorder():
             print(block)
         local_blockchain_copy = copy.deepcopy(self.blockchain)
@@ -134,7 +137,6 @@ class Node:
                     self.transaction_pool.remove_from_pool(block.transactions)
             self.blockchain = local_blockchain_copy"""
 
-    # TODO: Modify forger (remove extraneous operations, add necessary behavior)
     def forge(self):
         forger = self.blockchain.next_forger()
         if forger == self.wallet.public_key_string():
@@ -148,20 +150,14 @@ class Node:
         else:
             print('i am not the forger')
 
-    # function to feed in block data directly and test block addition to the mkd_blockchain
     def mkd_forge(self):
         print('I am the forger: ')
         block_data = self.blockchain.create_block(self.transaction_pool.transactions, self.wallet, self.node_id)
         self.transaction_pool.remove_from_pool(self.transaction_pool.transactions)
         block = block_data[0]
-        # print(block_data[1].data.to_json())
-        #  TODO: Make parent hashing more efficient
         block.parent_hash = BlockchainUtils.hash(block_data[1].to_json()).hexdigest()
-        # TODO: Move create subtree hash function here!!!
         kdtree.create_subtreehash(block_data[2])
-        return block  # TODO: change return to just broadcast
-
-
+        self.publish(block)
 
     def request_chain(self):
         message = Message(self.p2p.socketConnector, 'BLOCKCHAINREQUEST', None)

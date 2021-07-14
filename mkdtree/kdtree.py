@@ -246,8 +246,6 @@ class KDNode(Node):
         """
         Adds a point to the current node or iteratively descends to one of its children.
 
-        # TODO: Need to implement method to Re-hash the relevant branch bottom-up when point is added.
-
         Users should call add() only to the topmost tree.
         """
 
@@ -264,7 +262,6 @@ class KDNode(Node):
                 current.data = point
                 return current
 
-            # TODO: Ensure integrity of Merkle hash
             # split on self.axis, recurse either left or right
             if int(point[current.axis]) < int(current.data[current.axis]):
                 if current.left is None:

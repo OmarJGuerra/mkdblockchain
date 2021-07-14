@@ -5,7 +5,6 @@ from proof_of_stake import ProofOfStake
 from mkdtree import kdtree
 
 
-# TODO: link code so that blockchain is treated as mkd tree
 class MKDBlockchain:
     def __init__(self, dimensions, gnode_id, genesis_forger):
         # self.blocks = kdtree.KDNode(Block.genesis(), left=None, right=None, axis=0, sel_axis=1, )
@@ -87,7 +86,6 @@ class MKDBlockchain:
         next_forger = self.pos.forger(parent_block_hash)
         return next_forger
 
-    # TODO: Implement kdtree version of parent hash - replace indexing with tree traversal
     def create_block(self, transactions_from_pool, forger_wallet, node_id):
         covered_transactions = self.get_covered_transaction_set(
             transactions_from_pool)
