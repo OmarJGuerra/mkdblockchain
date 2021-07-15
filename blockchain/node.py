@@ -50,6 +50,9 @@ class Node:
             self.handle_blockchain(arg)
         elif t is SensorTransaction:
             self.handle_sensor_transaction(arg)
+        elif t is Node:
+            self.handle_node(arg)
+
         else:
             self.handle_transaction(arg)
 
@@ -178,3 +181,30 @@ class Node:
     def request_chain(self):
         message = Message(self.p2p.socketConnector, 'BLOCKCHAINREQUEST', None)
         self.p2p.broadcast(BlockchainUtils.encode(message))
+
+    def move_node(self, old_cluster_id, new_cluster_id):
+        # node will change cluster id to new cluster
+        old_topic = 'c' + str(old_cluster_id).strip()
+        new_topic = 'c' + str(new_cluster_id).strip()
+        old_cluster_size = len(self.blockchain.pos.stakers)
+
+        if old_topic != new_topic:
+            # publish self to old cluster: handler will see different cluster id and remove from POSc
+            self.publish(self)
+            self.cluster_id = new_cluster_id
+            # publish self to new cluster: handler will see same cluster id and add to POS
+            self.publish(self)
+            self.move_listener(old_topic, new_topic)
+            self.blockchain.chain_id = new_cluster_id
+            if old_topic != 'c0':
+                self.publish(self.blockchain)
+                # clears only if not last node to leave cluster
+                if old_cluster_size > 1:
+                    self.transaction_pool = TransactionPool()
+                else: # publish transactions to new cluster
+                    for transaction in self.transaction_pool.transactions:
+                        self.publish(transaction)
+
+
+
+

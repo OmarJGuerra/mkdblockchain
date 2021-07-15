@@ -11,6 +11,7 @@ class MKDBlockchain:
         self.blocks = kdtree.create_root(dimensions, gnode_id, genesis_forger)
         self.account_model = AccountModel()
         self.pos = ProofOfStake()
+        self.chain_id = 0
 
     def add_block(self, block):
         self.execute_transactions(block.transactions)
