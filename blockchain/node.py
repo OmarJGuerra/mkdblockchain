@@ -3,14 +3,16 @@ from transaction import Transaction
 from sensor_transaction import SensorTransaction
 from transaction_pool import TransactionPool
 from wallet import Wallet
-from socket_communication import SocketCommunication
-from node_api import NodeAPI
 from message import Message
 from block import Block
 from blockchain_utils import BlockchainUtils
 from pubsub import pub
 from mkdtree import kdtree
 import copy
+from transaction_pool import TransactionPool
+from proof_of_stake import ProofOfStake
+# from socket_communication import SocketCommunication
+# from node_api import NodeAPI
 
 
 class Node:
@@ -61,16 +63,16 @@ class Node:
         pub.sendMessage(cluster, arg=message)
 
     # TODO: Verify function of handle_sensor_transaction
-    def handle_sensor_transaction(self, transaction):
-        data = transaction.payload()
-        signature = transaction.signature
-        signer_public_key = transaction.sender_public_key
+    def handle_sensor_transaction(self, sensor_transaction):
+        data = sensor_transaction.payload()
+        signature = sensor_transaction.signature
+        signer_public_key = sensor_transaction.sender_public_key
         signature_valid = Wallet.signature_valid(
             data, signature, signer_public_key)
-        transaction_exists = self.transaction_pool.transaction_exists(transaction)
-        transaction_in_block = self.blockchain.transaction_exists(transaction)
+        transaction_exists = self.transaction_pool.transaction_exists(sensor_transaction)
+        transaction_in_block = self.blockchain.transaction_exists(sensor_transaction)
         if not transaction_exists and not transaction_in_block and signature_valid:
-            self.transaction_pool.add_transaction(transaction)
+            self.transaction_pool.add_transaction(sensor_transaction)
 
     def handle_transaction(self, transaction):
         data = transaction.payload()
@@ -102,7 +104,7 @@ class Node:
             block.transactions)
         signature_valid = Wallet.signature_valid(block_hash, signature, forger)
         if not block_count_valid:
-            self.request_chain()
+            self.blockchain.request_chain()
         if last_block_hash_valid and forger_valid and transactions_valid and signature_valid:
             self.blockchain.add_block(block)
             self.transaction_pool.remove_from_pool(block.transactions)
@@ -118,24 +120,38 @@ class Node:
     def handle_blockchain(self, blockchain):
         if len(blockchain.blocks) == 1 and self.blockchain.blocks is None:
             self.blockchain = copy.deepcopy(blockchain)
-
-        # else new node that enters cluster broadcasts it
-
-        """for block in blockchain.blocks.inorder():
-            print(block)
-        local_blockchain_copy = copy.deepcopy(self.blockchain)
-        print(local_blockchain_copy)
-        if local_blockchain_copy is not None:
-            local_block_count = len(local_blockchain_copy.blocks)
+            self.blockchain.chain_id = self.cluster_id
         else:
-            local_block_count = 0
-        received_chain_block_count = len(blockchain.blocks)
-        if local_block_count < received_chain_block_count:
-            for block_number, block in enumerate(blockchain.blocks):
-                if block_number >= local_block_count:
-                    local_blockchain_copy.add_block(block)
-                    self.transaction_pool.remove_from_pool(block.transactions)
-            self.blockchain = local_blockchain_copy"""
+            self.blockchain.blocks.merge(blockchain.blocks, self.blockchain.blocks)
+            self.blockchain.pos = copy.deepcopy(blockchain.pos)
+            pub.sendMessage()
+        """for block in blockchain.blocks.inorder():
+                    print(block)
+                local_blockchain_copy = copy.deepcopy(self.blockchain)
+                print(local_blockchain_copy)
+                if local_blockchain_copy is not None:
+                    local_block_count = len(local_blockchain_copy.blocks)
+                else:
+                    local_block_count = 0
+                received_chain_block_count = len(blockchain.blocks)
+                if local_block_count < received_chain_block_count:
+                    for block_number, block in enumerate(blockchain.blocks):
+                        if block_number >= local_block_count:
+                            local_blockchain_copy.add_block(block)
+                            self.transaction_pool.remove_from_pool(block.transactions)
+                    self.blockchain = local_blockchain_copy"""
+
+
+    # publish self to old cluster: handler will see different cluster id and remove from PO
+    # publish self to new cluster: handler will see same cluster id and add to POS
+    # TODO: need to change to use real values
+    def handle_node(self, node):
+        if self.cluster_id == node.cluster_id:
+            # TODO: figure out how to pass node info to update function
+            self.blockhain.pos.update(staker, amount)
+        else:
+            self.blockchain.pos.remove_staker(key)
+
 
     def forge(self):
         forger = self.blockchain.next_forger()

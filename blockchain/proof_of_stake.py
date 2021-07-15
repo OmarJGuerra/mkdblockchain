@@ -18,6 +18,9 @@ class ProofOfStake:
         else:
             self.stakers[public_key_string] = stake
 
+    def remove_staker(self, public_key_string):
+        del self.stakers[public_key_string]
+
     def get(self, public_key_string):
         if public_key_string in self.stakers.keys():
             return self.stakers[public_key_string]

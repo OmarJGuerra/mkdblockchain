@@ -301,13 +301,16 @@ class KDNode(Node):
 
     @require_axis
     def merge(self, other_tree):
-        merging_tree = other_tree if other_tree.size < self.size else self
-        merged_into_tree = other_tree if other_tree.size >= self.size else self
+        if self.st_hash != other_tree.st_hash:
+            merging_tree = other_tree if other_tree.size < self.size else self
+            merged_into_tree = other_tree if other_tree.size >= self.size else self
 
-        for kdn in merging_tree.inorder():
-            merged_into_tree.add_node(kdn)
+            for kdn in merging_tree.inorder():
+                merged_into_tree.add_node(kdn)
 
-        return merged_into_tree
+            return merged_into_tree
+        else:
+            return self
 
     @require_axis
     def add_node(self, node):
