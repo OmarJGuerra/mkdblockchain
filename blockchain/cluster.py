@@ -26,7 +26,7 @@ class Cluster:
         pub.subscribe(self.cluster_listener, cluster_topic)
 
     def cluster_listener(self, arg):
-        print(f'cluster {self.cluster_id} got {arg}')
+        #print(f'cluster {self.cluster_id} got {arg}')
         t = type(arg)
         if t == Node:
             self.handle_node(arg)

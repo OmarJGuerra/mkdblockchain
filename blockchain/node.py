@@ -48,16 +48,16 @@ class Node:
     def node_listener(self, arg):
         t = type(arg)
         if t is Block:
-            print(f'n{self.node_id} in c{self.cluster_id} received Block: {arg}')
+            #print(f'n{self.node_id} in c{self.cluster_id} received Block: {arg}')
             self.handle_block(arg)
         elif t is MKDBlockchain:
-            print(f'n{self.node_id} in c{self.cluster_id} received MKDBlockchain: {arg}')
+            #print(f'n{self.node_id} in c{self.cluster_id} received MKDBlockchain: {arg}')
             self.handle_blockchain(arg)
         elif t is SensorTransaction:
-            print(f'n{self.node_id} in c{self.cluster_id} received SensorTransaction: {arg}')
+            #print(f'n{self.node_id} in c{self.cluster_id} received SensorTransaction: {arg}')
             self.handle_sensor_transaction(arg)
         elif t is list:
-            print(f'n{self.node_id} in c{self.cluster_id} received list: {arg}')
+            #print(f'n{self.node_id} in c{self.cluster_id} received list: {arg}')
             self.handle_aggregator(arg)
 
     def move_listener(self, old_topic, new_topic):
@@ -168,6 +168,9 @@ class Node:
             if kd_node.data.parent_hash == 0:
                 continue
             if not merged_into_tree.node_in_tree(kd_node):
+                print(f'node_to_aggregate: {node_to_aggregate}')
+                print(f'getting the kdnode: {kd_node}')
+                print(f'node_to_aggregate.blockchain.get_parent(kd_node): {node_to_aggregate.blockchain.get_parent(kd_node)}')
                 p_node = node_to_aggregate.blockchain.get_parent(kd_node)
                 p_node_hash = BlockchainUtils.hash(p_node.data)
                 print(f'p_node_hash: {p_node_hash}, kd_node.data.parent_hash: {kd_node.data.parent_hash}')
