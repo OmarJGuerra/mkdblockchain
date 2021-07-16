@@ -340,7 +340,7 @@ class KDNode(Node):
             print("Node already in tree")
 
     @require_axis
-    def search(self, coordinates):
+    def search_by_coords(self, coordinates):
         print(f'coords: {coordinates}, self: {self.data}')
         if set(coordinates) == set(self.data):
             return self

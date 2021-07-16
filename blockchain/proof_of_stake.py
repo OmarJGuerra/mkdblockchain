@@ -37,7 +37,7 @@ class ProofOfStake:
     def winner_lot(self, lots, seed):
         winner_lot = None
         least_offset = None
-        reference_hash_int_value = int(BlockchainUtils.hash(seed).hexdigest(), 16)
+        reference_hash_int_value = seed
         for lot in lots:
             lot_int_value = int(lot.lot_hash(), 16)
             offset = abs(lot_int_value - reference_hash_int_value)

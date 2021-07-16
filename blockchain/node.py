@@ -17,8 +17,7 @@ from proof_of_stake import ProofOfStake
 
 class Node:
 
-    def __init__(self, node_id, cluster_id, key=None):
-        self.p2p = None
+    def __init__(self, node_id, cluster_id, blockchain=None, key=None):
         self.node_id = node_id
         self.cluster_id = cluster_id
         # self.port = port
@@ -42,13 +41,15 @@ class Node:
         pub.subscribe(self.node_listener, cluster_topic)
 
     def node_listener(self, arg):
-        print(f'c{self.node_id} received payload: {arg}')
         t = type(arg)
         if t is Block:
+            print(f'n{self.node_id} in c{self.cluster_id} received Block: {arg}')
             self.handle_block(arg)
         elif t is MKDBlockchain:
+            print(f'n{self.node_id} in c{self.cluster_id} received MKDBlockchain: {arg}')
             self.handle_blockchain(arg)
         elif t is SensorTransaction:
+            print(f'n{self.node_id} in c{self.cluster_id} received SensorTransaction: {arg}')
             self.handle_sensor_transaction(arg)
         elif t is Node:
             self.handle_node(arg)
@@ -96,23 +97,28 @@ class Node:
                 self.forge()
 
     def handle_block(self, block):
-        forger = block.forger
-        block_hash = block.payload()
-        signature = block.signature
+        self.blockchain.blocks.add(block)
+        self.transaction_pool.remove_from_pool(block.transactions)
+        # for transaction in block.transactions:
+        #     if self.transaction_pool.transaction_exists(transaction):
+        #         self.transaction_pool.remove_from_pool(transaction)
 
-        block_count_valid = self.blockchain.block_count_valid(block)
-        last_block_hash_valid = self.blockchain.parent_block_hash_valid(block)
-        forger_valid = self.blockchain.forger_valid(block)
-        transactions_valid = self.blockchain.transactions_valid(
-            block.transactions)
-        signature_valid = Wallet.signature_valid(block_hash, signature, forger)
-        if not block_count_valid:
-            self.blockchain.request_chain()
-        if last_block_hash_valid and forger_valid and transactions_valid and signature_valid:
-            self.blockchain.add_block(block)
-            self.transaction_pool.remove_from_pool(block.transactions)
-            message = Message(self.p2p.socketConnector, 'BLOCK', block)
-            self.p2p.broadcast(BlockchainUtils.encode(message))
+        # forger = block.forger
+        # block_hash = block.payload()
+        # signature = block.signature
+        # block_count_valid = self.blockchain.block_count_valid(block)
+        # parent_block_hash_valid = self.blockchain.parent_block_hash_valid(block)
+        #forger_valid = self.blockchain.forger_valid(block)
+        #transactions_valid = self.blockchain.transactions_valid(
+            #block.transactions)
+        #signature_valid = Wallet.signature_valid(block_hash, signature, forger)
+        # if not block_count_valid:
+        #     self.blockchain.request_chain()
+        # if last_block_hash_valid and forger_valid and transactions_valid and signature_valid:
+        #     self.blockchain.add_block(block)
+        #     self.transaction_pool.remove_from_pool(block.transactions)
+        #     message = Message(self.p2p.socketConnector, 'BLOCK', block)
+        #     self.p2p.broadcast(BlockchainUtils.encode(message))
 
     def handle_blockchain_request(self, requesting_node):
         message = Message(self.p2p.socketConnector,
@@ -121,7 +127,7 @@ class Node:
 
     # TODO: Need to add functionality for when blockchain is broadcast after merge and confirm function of deepcopy
     def handle_blockchain(self, blockchain):
-        if len(blockchain.blocks) == 1 and self.blockchain.blocks is None:
+        if len(blockchain.blocks) == 1:
             self.blockchain = copy.deepcopy(blockchain)
             self.blockchain.chain_id = self.cluster_id
         else:
@@ -170,6 +176,8 @@ class Node:
             print('i am not the forger')
 
     def mkd_forge(self):
+        # needs to pick forger
+
         print('I am the forger: ')
         block_data = self.blockchain.create_block(self.transaction_pool.transactions, self.wallet, self.node_id)
         self.transaction_pool.remove_from_pool(self.transaction_pool.transactions)
@@ -186,24 +194,23 @@ class Node:
         # node will change cluster id to new cluster
         old_topic = 'c' + str(old_cluster_id).strip()
         new_topic = 'c' + str(new_cluster_id).strip()
-        old_cluster_size = len(self.blockchain.pos.stakers)
+        # old_cluster_size = len(self.blockchain.pos.stakers)
 
         if old_topic != new_topic:
-            # publish self to old cluster: handler will see different cluster id and remove from POSc
+            # publish self to old cluster: handler will see different cluster id and remove from POS
+            print(f'node {self.node_id} is about to publish itself')
             self.publish(self)
             self.cluster_id = new_cluster_id
+            self.move_listener(old_topic, new_topic)
             # publish self to new cluster: handler will see same cluster id and add to POS
             self.publish(self)
-            self.move_listener(old_topic, new_topic)
-            self.blockchain.chain_id = new_cluster_id
-            if old_topic != 'c0':
-                self.publish(self.blockchain)
-                # clears only if not last node to leave cluster
-                if old_cluster_size > 1:
-                    self.transaction_pool = TransactionPool()
-                else: # publish transactions to new cluster
-                    for transaction in self.transaction_pool.transactions:
-                        self.publish(transaction)
+            # TODO: move transaction publication to aggregator after validating the blocks
+
+            # if old_cluster_size > 1:
+            #     self.transaction_pool = TransactionPool()
+            # else:  # publish transactions to new cluster
+            #     for transaction in self.transaction_pool.transactions:
+            #         self.publish(transaction)
 
 
 

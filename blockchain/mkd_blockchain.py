@@ -11,7 +11,6 @@ class MKDBlockchain:
         self.blocks = kdtree.create_root(dimensions, gnode_id, genesis_forger)
         self.account_model = AccountModel()
         self.pos = ProofOfStake()
-        self.chain_id = 0
 
     def add_block(self, block):
         self.execute_transactions(block.transactions)
@@ -88,10 +87,10 @@ class MKDBlockchain:
         return next_forger
 
     def create_block(self, transactions_from_pool, forger_wallet, node_id):
-        covered_transactions = self.get_covered_transaction_set(
-            transactions_from_pool)
-        self.execute_transactions(covered_transactions)
-        new_block = forger_wallet.create_block(covered_transactions, node_id)
+        # covered_transactions = self.get_covered_transaction_set(
+        #     transactions_from_pool)
+        #self.execute_transactions(transactions_from_pool)
+        new_block = forger_wallet.create_block(transactions_from_pool, node_id)
 
         # check if we need add here or in separate function
 
