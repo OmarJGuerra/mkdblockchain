@@ -45,14 +45,47 @@ class MKDBlockchain:
 
     def get_parent(self, node):
         current = self.blocks
-        while True:
+        print(f'node being passed into get_parent: {node}')
+        print(f'current get_parent initial, before while loop: {current}')
+        for kd_node in kdtree.level_order(current):
+            print(f'kd_node: {kd_node}')
+            print(f'kd_node.children(): {kd_node.children}')
+            for tup in kd_node.children:
+                if tup[0].data.parent_hash == node.data.parent_hash:
+                    return kd_node
+        '''
+        
+        if node.data.parent_hash == '0':
+            return node
+        while current is not None:
+            print(f'current from get_parent: {current}')
             # TODO: GET CORRECT PHASH FOR GENESIS OR DEAL WITH THE ERROR
-            if node.data == current.left.data or node.data == current.right.data:
-                return current
+            if current.left is None and current.right is None:
+                if current.data.parent_hash == node.datad
+            if current.left is not None:
+                if node.data == current.left.data:
+                    return current
+                elif node.data[current.axis] < current.data[current.axis]:
+                    current = current.left
+            else:
+
+            elif current.right is not None:
+                if node.data == current.right.data:
+                    return current
+
+
+
+
+
+
+
+
+
             if node.data[current.axis] < current.data[current.axis]:
                 current = current.left
             else:
                 current = current.right
+    '''
 
     def get_covered_transaction_set(self, transactions):
         covered_transactions = []

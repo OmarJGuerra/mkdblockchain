@@ -165,7 +165,7 @@ class Node:
         merging_tree = first_tree if merged_into_tree != first_tree else second_tree
 
         for kd_node in kdtree.level_order(merging_tree):
-            if kd_node.data.parent_hash == 0:
+            if kd_node.data.parent_hash == '0':
                 continue
             if not merged_into_tree.node_in_tree(kd_node):
                 print(f'node_to_aggregate: {node_to_aggregate}')
