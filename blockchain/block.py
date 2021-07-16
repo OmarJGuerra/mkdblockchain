@@ -43,25 +43,21 @@ class Block(dict):
         return genesis_block
 
     def to_json(self):
-        data = {'coordinates': self.coords,
-                'signature': self.signature,
-                'parent_hash': self.parent_hash}
+        j_data = {'coordinates': self.coords,
+                  'signature': self.signature,
+                  'parent_hash': self.parent_hash}
 
-        # data['block_count'] = self.block_count
-        # data['x'] = self.x
-        # data['y'] = self.y
-        # data['timestamp'] = self[2]
         json_transactions = []
         for transaction in self.transactions:
             json_transactions.append(transaction.to_json())
-        data['transactions'] = json_transactions
-        return data
+        j_data['transactions'] = json_transactions
+
+        return j_data
 
     def payload(self):
         json_representation = copy.deepcopy(self.to_json())
         json_representation['signature'] = ''
         return json_representation
-
 
     def sign(self, signature):
         self.signature = signature

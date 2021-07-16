@@ -20,12 +20,14 @@ class MKDBlockchain:
 
     # modified loop to traverse the tree in order
     def to_json(self):
-        data = {}
+        j_data = {}
         json_blocks = []
         for block in self.blocks.inorder():
             json_blocks.append(block.to_json())
-        data['blocks'] = json_blocks
-        return data
+        j_data['blocks'] = json_blocks
+        j_data['account_model'] = self.account_model.to_json()
+        j_data['pos'] = self.pos.to_json()
+        return j_data
 
     # NOTE: Might not need blockcount
     def block_count_valid(self, block):
@@ -35,12 +37,22 @@ class MKDBlockchain:
             return False
 
     def parent_block_hash_valid(self, block):
-        latest_blockchain_block_hash = BlockchainUtils.hash(
-            self.blocks[-1].payload()).hexdigest()
-        if latest_blockchain_block_hash == block.last_hash:
+        parent_block_hash = BlockchainUtils.hash(block).hexdigest()
+        if parent_block_hash == block.parent_hash:
             return True
         else:
             return False
+
+    def get_parent(self, node):
+        current = self.blocks
+        while True:
+            # TODO: GET CORRECT PHASH FOR GENESIS OR DEAL WITH THE ERROR
+            if node.data == current.left.data or node.data == current.right.data:
+                return current
+            if node.data[current.axis] < current.data[current.axis]:
+                current = current.left
+            else:
+                current = current.right
 
     def get_covered_transaction_set(self, transactions):
         covered_transactions = []
@@ -100,9 +112,9 @@ class MKDBlockchain:
         return new_block, parent, traversed_kdnodes
 
     def transaction_exists(self, transaction):
-        for node in self.blocks.inorder():
-            for block_transaction in node.data.transactions:
-                if transaction.id.equals(block_transaction.id):
+        for kd_node in kdtree.level_order(self.blocks):
+            for block_transaction in kd_node.data.transactions:
+                if transaction.id == block_transaction.id:
                     return True
         return False
 

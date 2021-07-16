@@ -299,13 +299,14 @@ class KDNode(Node):
                               sel_axis=self.sel_axis,
                               dimensions=self.dimensions)
 
+    #def aggregate(self, other_tree):
     @require_axis
     def merge(self, other_tree):
         if self.st_hash != other_tree.st_hash:
             merging_tree = other_tree if other_tree.size < self.size else self
             merged_into_tree = other_tree if other_tree.size >= self.size else self
 
-            for kdn in merging_tree.inorder():
+            for kdn in merging_tree.level_order():
                 merged_into_tree.add_node(kdn)
 
             return merged_into_tree
@@ -340,6 +341,30 @@ class KDNode(Node):
             print("Node already in tree")
 
     @require_axis
+    def node_in_tree(self, node):
+        return True if self.search_node(node) is not None else False
+
+    @require_axis
+    def search_node(self, node):
+        if node.data.coords == self.data.coords:
+            return self
+        else:
+            if node.data.coords[self.axis] < self.data.coords[self.axis]:
+                print(f'{node.data.coords[self.axis]} < {self.data.coords[self.axis]}')
+                if self.left is not None:
+                    return self.left.search_node(node)
+                else:
+                    print('failed search')
+                    return
+            else:
+                print(f'{node.data.coords[self.axis]} >= {self.data.coords[self.axis]}')
+                if self.right is not None:
+                    return self.right.search_node(node)
+                else:
+                    print('failed search')
+                    return
+
+    @require_axis
     def search_by_coords(self, coordinates):
         print(f'coords: {coordinates}, self: {self.data}')
         if set(coordinates) == set(self.data):
@@ -348,18 +373,16 @@ class KDNode(Node):
             if coordinates[self.axis] < self.data[self.axis]:
                 print(f'{coordinates[self.axis]} < {self.data[self.axis]}')
                 if self.left is not None:
-                    print(self.left.search(coordinates))
-                    return self.left.search(coordinates)
+                    return self.left.search_by_coords(coordinates)
                 else:
-                    print('failed')
+                    print('failed search')
                     return
             else:
                 print(f'{coordinates[self.axis]} >= {self.data[self.axis]}')
                 if self.right is not None:
-                    print(self.right.search(coordinates))
-                    return self.right.search(coordinates)
+                    return self.right.search_by_coords(coordinates)
                 else:
-                    print('failed')
+                    print('failed search')
                     return
 
 

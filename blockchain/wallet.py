@@ -51,3 +51,6 @@ class Wallet:
         signature = self.sign(block.payload())
         block.sign(signature)
         return block
+
+    def to_json(self):
+        return self.public_key_string()

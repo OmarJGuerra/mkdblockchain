@@ -34,3 +34,11 @@ class TransactionPool:
             return True
         else:
             return False
+
+    def to_json(self):
+        j_data = {}
+        json_transactions = []
+        for transaction in self.transactions:
+            json_transactions.append(transaction.to_json())
+        j_data['transactions'] = json_transactions
+        return j_data

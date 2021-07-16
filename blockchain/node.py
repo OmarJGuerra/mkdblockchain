@@ -8,9 +8,14 @@ from block import Block
 from blockchain_utils import BlockchainUtils
 from pubsub import pub
 from mkdtree import kdtree
-import copy
 from transaction_pool import TransactionPool
+
+import json
+import copy
+
 from proof_of_stake import ProofOfStake
+
+
 # from socket_communication import SocketCommunication
 # from node_api import NodeAPI
 
@@ -21,7 +26,7 @@ class Node:
         self.node_id = node_id
         self.cluster_id = cluster_id
         # self.port = port
-        self.blockchain = None
+        self.blockchain = blockchain
         self.transaction_pool = TransactionPool()
         self.wallet = Wallet()
         self.coords = [0.0, 0.0]
@@ -51,11 +56,9 @@ class Node:
         elif t is SensorTransaction:
             print(f'n{self.node_id} in c{self.cluster_id} received SensorTransaction: {arg}')
             self.handle_sensor_transaction(arg)
-        elif t is Node:
-            self.handle_node(arg)
-
-        else:
-            self.handle_transaction(arg)
+        elif t is list:
+            print(f'n{self.node_id} in c{self.cluster_id} received list: {arg}')
+            self.handle_aggregator(arg)
 
     def move_listener(self, old_topic, new_topic):
         pub.unsubscribe(self.node_listener, old_topic)  # core.TopicManager.getTopicsSubscribed(listener))
@@ -63,7 +66,7 @@ class Node:
 
     # TODO: fix handlers to use publish instead of p2p
     def publish(self, message):
-        cluster = 'c'+str(self.cluster_id).strip()
+        cluster = 'c' + str(self.cluster_id).strip()
         pub.sendMessage(cluster, arg=message)
 
     # TODO: Verify function of handle_sensor_transaction
@@ -150,17 +153,40 @@ class Node:
                             self.transaction_pool.remove_from_pool(block.transactions)
                     self.blockchain = local_blockchain_copy"""
 
+    def handle_aggregator(self, arg):
+        agg_pub_key = arg[0]
+        if agg_pub_key != self.wallet.public_key_string():
+            return
 
-    # publish self to old cluster: handler will see different cluster id and remove from PO
-    # publish self to new cluster: handler will see same cluster id and add to POS
-    # TODO: need to change to use real values
-    def handle_node(self, node):
-        if self.cluster_id == node.cluster_id:
-            # TODO: figure out how to pass node info to update function
-            self.blockhain.pos.update(staker, amount)
-        else:
-            self.blockchain.pos.remove_staker(key)
+        node_to_aggregate = arg[1]
+        first_tree = self.blockchain.blocks
+        second_tree = node_to_aggregate.blockchain.blocks
+        merged_into_tree = first_tree if first_tree.size > second_tree.size else second_tree
+        merging_tree = first_tree if merged_into_tree != first_tree else second_tree
 
+        for kd_node in kdtree.level_order(merging_tree):
+            if kd_node.data.parent_hash == 0:
+                continue
+            if not merged_into_tree.node_in_tree(kd_node):
+                p_node = node_to_aggregate.blockchain.get_parent(kd_node)
+                p_node_hash = BlockchainUtils.hash(p_node.data)
+                print(f'p_node_hash: {p_node_hash}, kd_node.data.parent_hash: {kd_node.data.parent_hash}')
+                if p_node_hash == kd_node.data.parent_hash:
+                    # need to publish
+                    self.publish(kd_node.data)
+
+        # TODO:
+        # for first_node, second_node in itertools.zip_longest(self.blockchain.blocks.level_order(),
+        #                                                      agg_node.blockchain.blocks.level_order()):
+        #     if first_node.blockchain.blocks.st_hash == second_node.blockchain.blocks.:
+        #         continue
+        #     '''#else:
+        #     else:
+        #
+        #     '''
+        # level order - for comparing trees
+        # children iterator to verify parent hash
+        # postorder if not verified to prune children
 
     def forge(self):
         forger = self.blockchain.next_forger()
@@ -212,6 +238,12 @@ class Node:
             #     for transaction in self.transaction_pool.transactions:
             #         self.publish(transaction)
 
-
-
-
+    def to_json(self):
+        bctj = self.blockchain.to_json() if self.blockchain is not None else ''
+        j_data = {'node_id': self.node_id,
+                  'cluster_id': self.cluster_id,
+                  'blockchain': bctj,
+                  'transaction_pool': self.transaction_pool.to_json(),
+                  'wallet': self.wallet.to_json(),
+                  'coords': self.coords}
+        return j_data

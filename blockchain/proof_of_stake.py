@@ -10,7 +10,7 @@ class ProofOfStake:
 
     def set_genesis_node_stake(self):
         genesis_public_key = open('keys/genesisPublicKey.pem', 'r').read()
-        self.stakers[genesis_public_key] = 1
+        self.stakers[genesis_public_key] = 10
 
     def update(self, public_key_string, stake):
         if public_key_string in self.stakers.keys():
@@ -49,4 +49,8 @@ class ProofOfStake:
     def forger(self, last_block_hash):
         lots = self.validator_lots(last_block_hash)
         winner_lot = self.winner_lot(lots, last_block_hash)
-        return winner_lot.publicKey
+        return winner_lot.public_key
+
+    def to_json(self):
+        j_data = {'stakers': self.stakers}
+        return j_data

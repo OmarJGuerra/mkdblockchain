@@ -11,6 +11,7 @@ class Cluster:
 
     def __init__(self, c_id=0):
         self.cluster_id = c_id
+        self.cluster_topic = 'c' + str(self.cluster_id).strip()
         self.member_nodes = []
         self.pos = ProofOfStake()
 

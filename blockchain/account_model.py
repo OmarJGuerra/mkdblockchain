@@ -18,3 +18,8 @@ class AccountModel:
         if public_key_string not in self.accounts:
             self.add_account(public_key_string)
         self.balances[public_key_string] += amount
+
+    def to_json(self):
+        data = {'accounts': self.accounts,
+                'balances': self.balances}
+        return data
