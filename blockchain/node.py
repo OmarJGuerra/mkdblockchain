@@ -1,3 +1,5 @@
+import time
+
 from mkd_blockchain import MKDBlockchain
 from sensor_transaction import SensorTransaction
 from wallet import Wallet
@@ -9,6 +11,7 @@ import kdtree  # removed from blockchain  # removed from blockchain
 from transaction_pool import TransactionPool
 
 import copy
+import csv
 
 
 # from socket_communication import SocketCommunication
@@ -22,6 +25,7 @@ class Node:
         self.cluster_id = cluster_id
         # self.port = port
         self.blockchain = blockchain
+        self.blockchain_size = 0
         self.transaction_pool = TransactionPool()
         self.wallet = Wallet()
         self.coords = [0.0, 0.0]
@@ -95,14 +99,20 @@ class Node:
                 self.forge()
 
     def handle_block(self, block):
+
         self.blockchain.blocks.add(block)
+        self.blockchain_size += 1
         self.transaction_pool.remove_from_pool(block.transactions)
+        left_size, right_size = self.blockchain.blocks.get_left_right_size()
+        with open('branch_size_left_right.csv', mode='a') as branch_size:
+            branch_size_writer = csv.writer(branch_size, delimiter='.', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            branch_size_writer.writerow([self.cluster_id, self.node_id, left_size, right_size])
         # for transaction in block.transactions:
         #     if self.transaction_pool.transaction_exists(transaction):
         #         self.transaction_pool.remove_from_pool(transaction)
 
         # forger = block.forger
-        # block_hash = block.payload()
+        # block_hash = block.payload()d
         # signature = block.signature
         # block_count_valid = self.blockchain.block_count_valid(block)
         # parent_block_hash_valid = self.blockchain.parent_block_hash_valid(block)
@@ -159,6 +169,13 @@ class Node:
         merged_into_tree = first_tree if first_tree.size > second_tree.size else second_tree
         merging_tree = first_tree if merged_into_tree != first_tree else second_tree
 
+        merging_tree_size = merging_tree.size
+        merged_into_tree_size = merged_into_tree.size
+
+        validation_time = open('validation_time.csv', mode='a')
+        validation_time_writer = csv.writer(validation_time, delimeter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+        before_merge = time.time()
         for kd_node in kdtree.level_order(merging_tree):
             if kd_node.data.parent_hash == '0':
                 continue
@@ -172,6 +189,11 @@ class Node:
                 if p_node_hash == kd_node.data.parent_hash:
                     # need to publish
                     self.publish(kd_node.data)
+        after_merge = time.time() - before_merge
+        validation_time_writer.writerow([node_to_aggregate.cluster_id, merged_into_tree_size,merging_tree_size, after_merge])
+        validation_time_writer.close()
+
+
 
         # TODO:
         # for first_node, second_node in itertools.zip_longest(self.blockchain.blocks.level_order(),

@@ -5,8 +5,13 @@ from sensor_transaction import SensorTransaction
 
 import random
 import time
+import csv
 
 if __name__ == '__main__':
+
+    cluster_block_forging = open('cluster_block_forging.csv', mode='w')
+    cluster_forging_writer = csv.writer(cluster_block_forging, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
     # Initialize Nodes with Genesis Block
     print('START')
     MAX_NODES = 9999
@@ -80,24 +85,29 @@ if __name__ == '__main__':
                     node.publish(transaction)
 
 
-                b = 0
+                block_num = 0
                 # if time to forge then forge and broadcast, needs to scan and perform all clusters
                 if int(parts[1]) % forging_interval == 0:
-                    b +=1
-                    forge_begin = time.time()
+                    block_num +=1
                     for cluster in clusters:
+                        cluster_id = 1
                         #  choose a forger
                         forger = cluster.next_forger()
                         #  if transaction pool not empty then forge and broadcast
                         for node in cluster.member_nodes:
                             if node.wallet.public_key_string() == forger and node.transaction_pool.transactions is not []:
+                                forge_begin = time.time()
                                 node.mkd_forge()
-                    forge_end = time.time()-forge_begin
-                    print(f'Time to forge block {b}: {forge_end}')
+                                forge_end = time.time()-forge_begin
+                        cluster_forging_writer.writerow([cluster_id, block_num, forge_end])
+                        cluster_id += 1
+                    #print(f'Time to forge block {block_num}: {forge_end}')
             i += 1
 
     now = time.time() - then
+    cluster_block_forging.close()
     print(f'Complete movement simulation @ {num_nodes} nodes: {now}')
+
 
     # with open('dataset.txt') as infile:
     #     for s in range(0, total_time):

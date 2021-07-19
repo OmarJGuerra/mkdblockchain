@@ -290,7 +290,10 @@ class KDNode(Node):
                     traversed_kdnodes.append(current)
 
 
-
+    def get_left_right_size(self):
+        left_size = self.left.size if self.left is not None else 0
+        right_size = self.right.size if self.right is not None else 0
+        return left_size, right_size
 
     @require_axis
     def create_subnode(self, data):
@@ -705,6 +708,31 @@ def create_subtreehash(traversed_kdnodes):
             kdnode.subtree_hash = kdnode.right.subtree_hash
         else:
             kdnode.subtree_hash = BU.hash(kdnode.data.to_json()).hexdigest()
+
+# def verify_subtree_hash(root, kdnode):
+#     if kdnode != root:
+#         if kdnode.data[root.axis] < root.data[root.axis]:
+    #         if not self.left:
+    #             self.left = node
+    #             self.left.st_hash = BU.hash(self.left.data).hexdigest()
+    #             right_hash = self.right.st_hash if self.right is not None else ''
+    #             self.st_hash = concat_hashes(self.left.st_hash, right_hash)
+    #             self.left.data.parent_hash = BU.hash(self.data.to_json).hexdigest()
+    #             return self.left
+    #         else:
+    #             return self.left.add_node(node)
+    #     else:
+    #         if not self.right:
+    #             self.right = node
+    #             self.right.st_hash = BU.hash(self.right.data.to_json).hexdigest()
+    #             left_hash = self.left.st_hash if self.left is not None else ''
+    #             self.st_hash = concat_hashes(left_hash, self.right.st_hash)
+    #             self.right.data.parent_hash = BU.hash(self.data.to_json).hexdigest()
+    #             return self.right
+    #         else:
+    #             return self.right.add_node(node)
+    # else:
+    #     print("Node already in tree")
 
 
 def concat_hashes(hash1, hash2):
