@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     bob = Wallet()
     alice = Wallet()
-    alice.from_key('keys/stakerPrivateKey.pem')
+    alice.from_key('blockchain/keys/stakerPrivateKey.pem')  # added blockchain to file path
     exchange = Wallet()
 
     #forger: genesis
