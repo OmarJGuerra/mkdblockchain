@@ -1,8 +1,7 @@
-from block import Block
 from blockchain_utils import BlockchainUtils
 from account_model import AccountModel
 from proof_of_stake import ProofOfStake
-from mkdtree import kdtree
+from blockchain import kdtree
 
 
 class MKDBlockchain:

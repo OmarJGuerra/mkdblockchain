@@ -1,19 +1,14 @@
 from mkd_blockchain import MKDBlockchain
-from transaction import Transaction
 from sensor_transaction import SensorTransaction
-from transaction_pool import TransactionPool
 from wallet import Wallet
 from message import Message
 from block import Block
 from blockchain_utils import BlockchainUtils
 from pubsub import pub
-from mkdtree import kdtree
+from blockchain import kdtree
 from transaction_pool import TransactionPool
 
-import json
 import copy
-
-from proof_of_stake import ProofOfStake
 
 
 # from socket_communication import SocketCommunication

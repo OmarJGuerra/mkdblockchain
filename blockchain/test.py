@@ -2,11 +2,8 @@
 
 from __future__ import absolute_import
 
-import sys
 import random
-import logging
 import unittest
-import doctest
 import collections
 from itertools import islice
 
@@ -105,7 +102,7 @@ class InvalidTreeTests(unittest.TestCase):
 
     def test_invalid_child(self):
         """ Children on wrong subtree invalidate Tree """
-        child = kdtree.KDNode( (3, 2) )
+        child = kdtree.KDNode((3, 2))
         child.axis = 2
         tree = kdtree.create([(2, 3)])
         tree.left=child
@@ -337,7 +334,7 @@ class PointTypeTests(unittest.TestCase):
         tree = kdtree.create([point1, point2, point3])
         res, dist = tree.search_nn( (1, 2, 3) )
 
-        self.assertEqual(res, kdtree.KDNode( (2, 3, 4) ))
+        self.assertEqual(res, kdtree.KDNode((2, 3, 4)))
 
 
 class PayloadTests(unittest.TestCase):
