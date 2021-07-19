@@ -16,8 +16,8 @@ import operator
 import math
 from collections import deque
 from functools import wraps
-from blockchain import block
-from blockchain.blockchain_utils import BlockchainUtils as BU
+import block  # removed from blockchain
+from blockchain_utils import BlockchainUtils as BU  # removed from blockchain
 
 __author__ = u'Stefan Kögl <stefan@skoegl.net>'
 __version__ = '0.16'

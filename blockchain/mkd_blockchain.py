@@ -1,7 +1,7 @@
 from blockchain_utils import BlockchainUtils
 from account_model import AccountModel
 from proof_of_stake import ProofOfStake
-from blockchain import kdtree
+import kdtree  # removed from blockchain
 
 
 class MKDBlockchain:

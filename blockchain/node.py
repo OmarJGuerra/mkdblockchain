@@ -5,7 +5,7 @@ from message import Message
 from block import Block
 from blockchain_utils import BlockchainUtils
 from pubsub import pub
-from blockchain import kdtree
+import kdtree  # removed from blockchain  # removed from blockchain
 from transaction_pool import TransactionPool
 
 import copy
