@@ -18,7 +18,7 @@ class TransactionPool:
         new_pool_transactions = []
         for poolTransaction in self.transactions:
             insert = True
-            print(f'transactions: [')
+            #print(f'transactions: [')
             for transaction in transactions:
                 if poolTransaction.equals(transaction):
                     insert = False

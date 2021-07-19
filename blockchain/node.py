@@ -163,12 +163,12 @@ class Node:
             if kd_node.data.parent_hash == '0':
                 continue
             if not merged_into_tree.node_in_tree(kd_node):
-                print(f'node_to_aggregate: {node_to_aggregate}')
-                print(f'getting the kdnode: {kd_node}')
-                print(f'node_to_aggregate.blockchain.get_parent(kd_node): {node_to_aggregate.blockchain.get_parent(kd_node)}')
+                #print(f'node_to_aggregate: {node_to_aggregate}')
+                #print(f'getting the kdnode: {kd_node}')
+                #print(f'node_to_aggregate.blockchain.get_parent(kd_node): {node_to_aggregate.blockchain.get_parent(kd_node)}')
                 p_node = node_to_aggregate.blockchain.get_parent(kd_node)
                 p_node_hash = BlockchainUtils.hash(p_node.data)
-                print(f'p_node_hash: {p_node_hash}, kd_node.data.parent_hash: {kd_node.data.parent_hash}')
+                #print(f'p_node_hash: {p_node_hash}, kd_node.data.parent_hash: {kd_node.data.parent_hash}')
                 if p_node_hash == kd_node.data.parent_hash:
                     # need to publish
                     self.publish(kd_node.data)
@@ -222,7 +222,7 @@ class Node:
 
         if old_topic != new_topic:
             # publish self to old cluster: handler will see different cluster id and remove from POS
-            print(f'node {self.node_id} is about to publish itself')
+            #print(f'node {self.node_id} is about to publish itself')
             self.publish(self)
             self.cluster_id = new_cluster_id
             self.move_listener(old_topic, new_topic)

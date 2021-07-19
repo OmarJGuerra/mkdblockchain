@@ -35,7 +35,7 @@ class Cluster:
     # publish self to new cluster: handler will see same cluster id and add to POS
     # TODO: need to change to use real values
     def handle_node(self, node):
-        print(f'cluster {self.cluster_id} is handling node {node}')
+        #print(f'cluster {self.cluster_id} is handling node {node}')
         if node not in self.member_nodes:
             self.member_nodes.append(node)
             agg_pub_key = self.next_forger()

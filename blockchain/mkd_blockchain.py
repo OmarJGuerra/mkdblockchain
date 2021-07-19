@@ -44,11 +44,11 @@ class MKDBlockchain:
 
     def get_parent(self, node):
         current = self.blocks
-        print(f'node being passed into get_parent: {node}')
-        print(f'current get_parent initial, before while loop: {current}')
+        #print(f'node being passed into get_parent: {node}')
+        #print(f'current get_parent initial, before while loop: {current}')
         for kd_node in kdtree.level_order(current):
-            print(f'kd_node: {kd_node}')
-            print(f'kd_node.children(): {kd_node.children}')
+            #print(f'kd_node: {kd_node}')
+            #print(f'kd_node.children(): {kd_node.children}')
             for tup in kd_node.children:
                 if tup[0].data.parent_hash == node.data.parent_hash:
                     return kd_node

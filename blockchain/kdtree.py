@@ -350,14 +350,14 @@ class KDNode(Node):
             return self
         else:
             if node.data.coords[self.axis] < self.data.coords[self.axis]:
-                print(f'{node.data.coords[self.axis]} < {self.data.coords[self.axis]}')
+                #print(f'{node.data.coords[self.axis]} < {self.data.coords[self.axis]}')
                 if self.left is not None:
                     return self.left.search_node(node)
                 else:
                     print('failed search')
                     return
             else:
-                print(f'{node.data.coords[self.axis]} >= {self.data.coords[self.axis]}')
+                #print(f'{node.data.coords[self.axis]} >= {self.data.coords[self.axis]}')
                 if self.right is not None:
                     return self.right.search_node(node)
                 else:
@@ -366,19 +366,19 @@ class KDNode(Node):
 
     @require_axis
     def search_by_coords(self, coordinates):
-        print(f'coords: {coordinates}, self: {self.data}')
+        #print(f'coords: {coordinates}, self: {self.data}')
         if set(coordinates) == set(self.data):
             return self
         else:
             if coordinates[self.axis] < self.data[self.axis]:
-                print(f'{coordinates[self.axis]} < {self.data[self.axis]}')
+                #print(f'{coordinates[self.axis]} < {self.data[self.axis]}')
                 if self.left is not None:
                     return self.left.search_by_coords(coordinates)
                 else:
                     print('failed search')
                     return
             else:
-                print(f'{coordinates[self.axis]} >= {self.data[self.axis]}')
+                #print(f'{coordinates[self.axis]} >= {self.data[self.axis]}')
                 if self.right is not None:
                     return self.right.search_by_coords(coordinates)
                 else:
