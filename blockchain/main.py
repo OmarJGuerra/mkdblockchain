@@ -50,7 +50,7 @@ if __name__ == '__main__':
     # Opens the data set file and generates nodes based on the provided data.
     # file is comma delimited in the following format: time-nodeID-x_coord-y_coord-miner-region-prev_region
     then = time.time()
-    with open('node_data.txt') as f:
+    with open('blockchain/node_data.txt') as f:  # added blockchain to file path
         lines = f.readlines()  # list containing lines of file
         i = 0
 
