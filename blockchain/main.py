@@ -58,6 +58,7 @@ if __name__ == '__main__':
     with open('blockchain/node_data.txt') as f:  # added blockchain to file path
         lines = f.readlines()  # list containing lines of file
         i = 0
+        cycles = 0
 
         nodes_transacting = []
 
@@ -80,6 +81,8 @@ if __name__ == '__main__':
 
             #  Once it reaches the end of num_nodes for each time increment submit transactions
             if j == (num_nodes - 1):
+                cycles += 1
+                print(f'Number of cycles: {cycles}')
                 for node in nodes_transacting:
                     transaction = SensorTransaction(node.wallet.public_key_string(), random.randint(0, 1000))
                     node.publish(transaction)
