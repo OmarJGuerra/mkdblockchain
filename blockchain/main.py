@@ -79,8 +79,12 @@ if __name__ == '__main__':
                     transaction = SensorTransaction(node.wallet.public_key_string(), random.randint(0, 1000))
                     node.publish(transaction)
 
+
+                b = 0
                 # if time to forge then forge and broadcast, needs to scan and perform all clusters
                 if int(parts[1]) % forging_interval == 0:
+                    b +=1
+                    forge_begin = time.time()
                     for cluster in clusters:
                         #  choose a forger
                         forger = cluster.next_forger()
@@ -88,6 +92,8 @@ if __name__ == '__main__':
                         for node in cluster.member_nodes:
                             if node.wallet.public_key_string() == forger and node.transaction_pool.transactions is not []:
                                 node.mkd_forge()
+                    forge_end = time.time()-forge_begin
+                    print(f'Time to forge block {b}: {forge_end}')
             i += 1
 
     now = time.time() - then
