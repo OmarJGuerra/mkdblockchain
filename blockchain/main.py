@@ -84,7 +84,6 @@ if __name__ == '__main__':
                     transaction = SensorTransaction(node.wallet.public_key_string(), random.randint(0, 1000))
                     node.publish(transaction)
 
-
                 block_num = 0
                 # if time to forge then forge and broadcast, needs to scan and perform all clusters
                 if int(parts[1]) % forging_interval == 0:
