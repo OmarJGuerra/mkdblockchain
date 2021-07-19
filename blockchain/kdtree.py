@@ -260,6 +260,7 @@ class KDNode(Node):
             # Adding has hit an empty leaf-node, add here
             if current.data is None:
                 current.data = point
+                current.size += 1
                 return current
 
             # split on self.axis, recurse either left or right
@@ -275,7 +276,6 @@ class KDNode(Node):
                     current.size += 1
                     current = current.left
                     traversed_kdnodes.append(current)
-
             else:
                 if current.right is None:
                     parent = current.data
@@ -285,6 +285,7 @@ class KDNode(Node):
                     # print(f'Traversed kd Nodes: {traversed_kdnodes}')
                     return current.right, parent, traversed_kdnodes
                 else:
+                    current.size += 1
                     current = current.right
                     traversed_kdnodes.append(current)
 
