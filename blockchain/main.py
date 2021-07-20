@@ -53,7 +53,7 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
     # Opens the data set file and generates nodes based on the provided data.
     # file is comma delimited in the following format: time-nodeID-x_coord-y_coord-miner-region-prev_region
     # then = time.time()
-    with open('blockchain/node_data.txt') as f:  # added blockchain to file path
+    with open(f'blockchain/node_data_{test_num}.txt') as f:  # added blockchain to file path
         lines = f.readlines()  # list containing lines of file
         i = 0
         cycles = 0
@@ -80,7 +80,7 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
             #  Once it reaches the end of num_nodes for each time increment submit transactions
             if j == (num_nodes - 1):
                 cycles += 1
-                print(f'Number of cycles: {cycles}')
+                print(f'Number of cycles for test {test_num}: {cycles}')
                 for node in nodes_transacting:
                     transaction = SensorTransaction(node.wallet.public_key_string(), random.randint(0, 1000))
                     node.publish(transaction)
