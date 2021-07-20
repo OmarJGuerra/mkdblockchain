@@ -17,7 +17,7 @@ if __name__ == '__main__':
     MAX_NODES = 9999
     num_nodes = 80
     num_clusters = 16
-    forging_interval = 20  # Time interval.  10 units of time
+    forging_interval = 10  # Time interval.  10 units of time
     nodes = []  # list of all nodes
     blockchain_dimensions = 4
     genesis_node_id = int(num_nodes / 2)
