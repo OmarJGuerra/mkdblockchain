@@ -103,10 +103,6 @@ class Node:
         self.blockchain.blocks.add(block)
         self.blockchain_size += 1
         self.transaction_pool.remove_from_pool(block.transactions)
-        left_size, right_size = self.blockchain.blocks.get_left_right_size()
-        with open('branch_size_left_right.csv', mode='a') as branch_size:
-            branch_size_writer = csv.writer(branch_size, delimiter='.', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            branch_size_writer.writerow([self.cluster_id, self.node_id, left_size, right_size])
         # for transaction in block.transactions:
         #     if self.transaction_pool.transaction_exists(transaction):
         #         self.transaction_pool.remove_from_pool(transaction)
@@ -180,12 +176,12 @@ class Node:
             if kd_node.data.parent_hash == '0':
                 continue
             if not merged_into_tree.node_in_tree(kd_node):
-                #print(f'node_to_aggregate: {node_to_aggregate}')
-                #print(f'getting the kdnode: {kd_node}')
-                #print(f'node_to_aggregate.blockchain.get_parent(kd_node): {node_to_aggregate.blockchain.get_parent(kd_node)}')
+                # print(f'node_to_aggregate: {node_to_aggregate}')
+                # print(f'getting the kdnode: {kd_node}')
+                # print(f'node_to_aggregate.blockchain.get_parent(kd_node): {node_to_aggregate.blockchain.get_parent(kd_node)}')
                 p_node = node_to_aggregate.blockchain.get_parent(kd_node)
                 p_node_hash = BlockchainUtils.hash(p_node.data)
-                #print(f'p_node_hash: {p_node_hash}, kd_node.data.parent_hash: {kd_node.data.parent_hash}')
+                #  print(f'p_node_hash: {p_node_hash}, kd_node.data.parent_hash: {kd_node.data.parent_hash}')
                 if p_node_hash == kd_node.data.parent_hash:
                     # need to publish
                     self.publish(kd_node.data)

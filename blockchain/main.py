@@ -38,7 +38,6 @@ if __name__ == '__main__':
         new_cluster = Cluster(i + 1)
         new_cluster.start_listener(('c' + str(i + 1)))
         clusters.append(new_cluster)
-        #print(f'cluster {new_cluster.cluster_id} initialized')
 
     genesis_forger = nodes[genesis_node_id - 1].wallet.public_key_string()
     mkd_blockchain = MKDBlockchain(blockchain_dimensions, genesis_node_id, genesis_forger)
@@ -101,9 +100,12 @@ if __name__ == '__main__':
                                 forge_begin = time.time()
                                 node.mkd_forge()
                                 forge_end = time.time()-forge_begin
+                            left_size, right_size = node.blockchain.blocks.get_left_right_size()
+                            with open('branch_size_left_right.csv', mode='a') as branch_size:
+                                branch_size_writer = csv.writer(branch_size, delimiter='.', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                                branch_size_writer.writerow([node.cluster_id, node.node_id, left_size, right_size])
                         cluster_forging_writer.writerow([cluster_id, block_num, forge_end])
                         cluster_id += 1
-                    #print(f'Time to forge block {block_num}: {forge_end}')
             i += 1
 
     now = time.time() - then
@@ -111,14 +113,3 @@ if __name__ == '__main__':
     print(f'Complete movement simulation @ {num_nodes} nodes: {now}')
 
 
-    # with open('dataset.txt') as infile:
-    #     for s in range(0, total_time):
-    #         for n in range(0, node_num):
-    #             line = infile.readline().split()
-    #             if len(sys.argv) > 4:
-    #                 keyFile = sys.argv[4]
-    #
-    #             for i in range(0, cluster_num):
-    #                 node = Node(node_num, cluster_num, keyFile)
-    #                 # node.startP2P()
-    #                 # node.startAPI(apiPort)
