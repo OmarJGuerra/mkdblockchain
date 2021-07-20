@@ -358,14 +358,14 @@ class KDNode(Node):
                 if self.left is not None:
                     return self.left.search_node(node)
                 else:
-                    print('failed search')
+                    #print('failed search')
                     return
             else:
                 #print(f'{node.data.coords[self.axis]} >= {self.data.coords[self.axis]}')
                 if self.right is not None:
                     return self.right.search_node(node)
                 else:
-                    print('failed search')
+                    #print('failed search')
                     return
 
     @require_axis
@@ -379,14 +379,14 @@ class KDNode(Node):
                 if self.left is not None:
                     return self.left.search_by_coords(coordinates)
                 else:
-                    print('failed search')
+                    #print('failed search')
                     return
             else:
                 #print(f'{coordinates[self.axis]} >= {self.data[self.axis]}')
                 if self.right is not None:
                     return self.right.search_by_coords(coordinates)
                 else:
-                    print('failed search')
+                    #print('failed search')
                     return
 
 
