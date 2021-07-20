@@ -65,7 +65,6 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
         for line in lines:
             j = i % num_nodes  # j will represent the increments of nodes
             parts = line.split(',')
-            print(f'parts: {parts}')
 
             moving_node = nodes[j]  # choosing specific node to manipulate
             # assigning new coordinates to the moving node
@@ -90,9 +89,8 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
 
                 # block_num = 0
                 # if time to forge then forge and broadcast, needs to scan and perform all clusters
-                print(f'parts[1]: {parts[1]}')
                 if int(parts[1]) % forge_interval == 0:
-                    print(f'made it to forge step')
+                    print('Time to forge')
                     # block_num += 1
                     #cluster_id = 1
                     for cluster in clusters:
@@ -121,7 +119,7 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
 
 # run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions):
 if __name__ == '__main__':
-    run_sim_thread(1, 16, 80, 100, 4)
+    run_sim_thread(1, 16, 80, 20, 4)
 
     '''
         Regular Threading Method
