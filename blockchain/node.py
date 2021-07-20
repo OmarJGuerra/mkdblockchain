@@ -173,7 +173,7 @@ class Node:
         merged_into_tree_size = merged_into_tree.size
 
         validation_time = open('validation_time.csv', mode='a')
-        validation_time_writer = csv.writer(validation_time, delimeter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        validation_time_writer = csv.writer(validation_time, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
         before_merge = time.time()
         for kd_node in kdtree.level_order(merging_tree):
