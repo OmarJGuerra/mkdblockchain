@@ -1,3 +1,5 @@
+import threading
+
 from cluster import Cluster
 from mkd_blockchain import MKDBlockchain
 from node import Node
@@ -116,6 +118,22 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
 
 # run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions):
 if __name__ == '__main__':
+    test_1 = threading.Thread(target=run_sim_thread, args=(1, 16, 80, 20, 4))
+    test_2 = threading.Thread(target=run_sim_thread, args=(1, 16, 80, 30, 4))
+    test_3 = threading.Thread(target=run_sim_thread, args=(1, 16, 80, 40, 4))
+
+    test_1.start()
+    test_2.start()
+    test_3.start()
+
+    test_1.join()
+    test_2.join()
+    test_3.join()
+
+    '''
+        Executor Method
+    
+    # def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions):
     test_amount = 3
     cluster_test_numbers = [16, 16, 16]
     node_test_numbers = [80, 80, 80]
