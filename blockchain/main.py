@@ -109,7 +109,7 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
                                     branch_size_writer = csv.writer(branch_size, delimiter='.', quotechar='"',
                                                                     quoting=csv.QUOTE_MINIMAL)
                                     branch_size_writer.writerow([node.cluster_id, node.node_id, left_size, right_size])
-                            cluster_forging_writer.writerow([node.cluster_id, node.node_id, node.blockchain_size, forge_end])
+                                cluster_forging_writer.writerow([node.cluster_id, node.node_id, node.blockchain_size, forge_end])
                         #cluster_id += 1
             i += 1
 
