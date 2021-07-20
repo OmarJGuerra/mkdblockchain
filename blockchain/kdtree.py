@@ -717,7 +717,7 @@ def verify_mkd_blockchain(root):
 
 
 # Want to change to create_subtree_hash or create_st_hash
-def create_subtreehash(traversed_kdnodes):
+def create_subtree_hash(traversed_kdnodes):
     for kdnode in reversed(traversed_kdnodes):
         if kdnode.left is not None and kdnode.right is not None:
             #print(f'Left: {kdnode.left.subtree_hash} Right: {kdnode.right.subtree_hash}')

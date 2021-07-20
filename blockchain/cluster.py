@@ -1,17 +1,18 @@
-from proof_of_stake import ProofOfStake
 from blockchain_utils import BlockchainUtils
+from node import Node
+from proof_of_stake import ProofOfStake
 from pubsub import pub
 from wallet import Wallet
-from node import Node
-from pubsub import pub
 
 import json
 
+
 class Cluster:
 
-    def __init__(self, c_id=0):
+    def __init__(self, c_id=0, t_num=0):
         self.cluster_id = c_id
         self.cluster_topic = 'c' + str(self.cluster_id).strip()
+        self.full_topic = str(t_num).strip() + self.cluster_topic
         self.member_nodes = []
         self.pos = ProofOfStake()
 

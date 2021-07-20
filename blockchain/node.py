@@ -1,5 +1,3 @@
-import time
-
 from mkd_blockchain import MKDBlockchain
 from sensor_transaction import SensorTransaction
 from wallet import Wallet
@@ -12,6 +10,7 @@ from transaction_pool import TransactionPool
 
 import copy
 import csv
+import time
 
 
 # from socket_communication import SocketCommunication
@@ -20,7 +19,8 @@ import csv
 
 class Node:
 
-    def __init__(self, node_id, cluster_id, blockchain=None, key=None):
+    def __init__(self, test_num, node_id, cluster_id, blockchain=None, key=None):
+        self.test_num = test_num
         self.node_id = node_id
         self.cluster_id = cluster_id
         # self.port = port
@@ -47,16 +47,16 @@ class Node:
     def node_listener(self, arg):
         t = type(arg)
         if t is Block:
-            #print(f'n{self.node_id} in c{self.cluster_id} received Block: {arg}')
+            # print(f'n{self.node_id} in c{self.cluster_id} received Block: {arg}')
             self.handle_block(arg)
         elif t is MKDBlockchain:
-            #print(f'n{self.node_id} in c{self.cluster_id} received MKDBlockchain: {arg}')
+            # print(f'n{self.node_id} in c{self.cluster_id} received MKDBlockchain: {arg}')
             self.handle_blockchain(arg)
         elif t is SensorTransaction:
-            #print(f'n{self.node_id} in c{self.cluster_id} received SensorTransaction: {arg}')
+            # print(f'n{self.node_id} in c{self.cluster_id} received SensorTransaction: {arg}')
             self.handle_sensor_transaction(arg)
         elif t is list:
-            #print(f'n{self.node_id} in c{self.cluster_id} received list: {arg}')
+            # print(f'n{self.node_id} in c{self.cluster_id} received list: {arg}')
             self.handle_aggregator(arg)
 
     def move_listener(self, old_topic, new_topic):
@@ -99,7 +99,6 @@ class Node:
                 self.forge()
 
     def handle_block(self, block):
-
         self.blockchain.blocks.add(block)
         self.blockchain_size += 1
         self.transaction_pool.remove_from_pool(block.transactions)
@@ -112,10 +111,10 @@ class Node:
         # signature = block.signature
         # block_count_valid = self.blockchain.block_count_valid(block)
         # parent_block_hash_valid = self.blockchain.parent_block_hash_valid(block)
-        #forger_valid = self.blockchain.forger_valid(block)
-        #transactions_valid = self.blockchain.transactions_valid(
-            #block.transactions)
-        #signature_valid = Wallet.signature_valid(block_hash, signature, forger)
+        # forger_valid = self.blockchain.forger_valid(block)
+        # transactions_valid = self.blockchain.transactions_valid(
+            # block.transactions)
+        # signature_valid = Wallet.signature_valid(block_hash, signature, forger)
         # if not block_count_valid:
         #     self.blockchain.request_chain()
         # if last_block_hash_valid and forger_valid and transactions_valid and signature_valid:
@@ -170,7 +169,7 @@ class Node:
         merged_into_tree_size = merged_into_tree.size
         merging_tree_size = merging_tree.size
 
-        validation_time = open('validation_time.csv', mode='a')
+        validation_time = open(f'validation_time_{self.test_num}.csv', mode='a')
         validation_time_writer = csv.writer(validation_time, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
         nodes_published = 0
@@ -196,8 +195,6 @@ class Node:
         validation_time_writer.writerow([node_to_aggregate.cluster_id, node_to_aggregate.node_id, merged_into_tree_size,
                                          merging_tree_size, nodes_published, nodes_not_published, after_merge])
         validation_time.close()
-
-
 
         # TODO:
         # for first_node, second_node in itertools.zip_longest(self.blockchain.blocks.level_order(),
@@ -233,7 +230,7 @@ class Node:
         self.transaction_pool.remove_from_pool(self.transaction_pool.transactions)
         block = block_data[0]
         block.parent_hash = BlockchainUtils.hash(block_data[1].to_json()).hexdigest()
-        kdtree.create_subtreehash(block_data[2])
+        kdtree.create_subtree_hash(block_data[2])
         self.publish(block)
 
     def request_chain(self):
@@ -242,13 +239,13 @@ class Node:
 
     def move_node(self, old_cluster_id, new_cluster_id):
         # node will change cluster id to new cluster
-        old_topic = 'c' + str(old_cluster_id).strip()
-        new_topic = 'c' + str(new_cluster_id).strip()
+        old_topic = f'{self.test_num}.c{old_cluster_id}'  # + str(old_cluster_id).strip()
+        new_topic = f'{self.test_num}.c{new_cluster_id}'  # + str(new_cluster_id).strip()
         # old_cluster_size = len(self.blockchain.pos.stakers)
 
         if old_topic != new_topic:
             # publish self to old cluster: handler will see different cluster id and remove from POS
-            #print(f'node {self.node_id} is about to publish itself')
+            # print(f'node {self.node_id} is about to publish itself')
             self.publish(self)
             self.cluster_id = new_cluster_id
             self.move_listener(old_topic, new_topic)
