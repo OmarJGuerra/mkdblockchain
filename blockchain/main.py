@@ -65,6 +65,7 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
         for line in lines:
             j = i % num_nodes  # j will represent the increments of nodes
             parts = line.split(',')
+            print(f'parts: {parts}')
 
             moving_node = nodes[j]  # choosing specific node to manipulate
             # assigning new coordinates to the moving node
