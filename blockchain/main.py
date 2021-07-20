@@ -38,7 +38,7 @@ if __name__ == '__main__':
         new_cluster = Cluster(i + 1)
         new_cluster.start_listener(('c' + str(i + 1)))
         clusters.append(new_cluster)
-        print(f'cluster {new_cluster.cluster_id} initialized')
+        #print(f'cluster {new_cluster.cluster_id} initialized')
 
     genesis_forger = nodes[genesis_node_id - 1].wallet.public_key_string()
     mkd_blockchain = MKDBlockchain(blockchain_dimensions, genesis_node_id, genesis_forger)
