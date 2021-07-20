@@ -143,7 +143,7 @@ if __name__ == '__main__':
     with concurrent.futures.ThreadPoolExecutor(thread_name_prefix='test:') as executor:
         executor.map(run_sim_thread, range(1, test_amount+1), cluster_test_numbers, node_test_numbers,
                      forge_interval_test_numbers, dimensions_test_numbers)
-
+    '''
     # cluster_block_forging = open('cluster_block_forging.csv', mode='w')
     # cluster_forging_writer = csv.writer(cluster_block_forging, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     #
