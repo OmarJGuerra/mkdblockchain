@@ -191,7 +191,7 @@ class Node:
                     self.publish(kd_node.data)
         after_merge = time.time() - before_merge
         validation_time_writer.writerow([node_to_aggregate.cluster_id, merged_into_tree_size,merging_tree_size, after_merge])
-        validation_time_writer.close()
+        validation_time.close()
 
 
 
