@@ -116,10 +116,10 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
 
 # run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions):
 if __name__ == '__main__':
-    test_amount = 5
-    cluster_test_numbers = [10, 20, 30]
+    test_amount = 3
+    cluster_test_numbers = [16, 16, 16]
     node_test_numbers = [80, 80, 80]
-    forge_interval_test_numbers = [20, 20, 20]
+    forge_interval_test_numbers = [20, 30, 40]
     dimensions_test_numbers = [4, 4, 4]
 
     with concurrent.futures.ThreadPoolExecutor(thread_name_prefix='test:') as executor:
