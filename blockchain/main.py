@@ -91,7 +91,6 @@ if __name__ == '__main__':
                 if int(parts[1]) % forging_interval == 0:
                     block_num +=1
                     for cluster in clusters:
-                        cluster_id = 1
                         #  choose a forger
                         forger = cluster.next_forger()
                         #  if transaction pool not empty then forge and broadcast
@@ -104,7 +103,7 @@ if __name__ == '__main__':
                             with open('branch_size_left_right.csv', mode='a') as branch_size:
                                 branch_size_writer = csv.writer(branch_size, delimiter='.', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                                 branch_size_writer.writerow([node.cluster_id, node.node_id, left_size, right_size])
-                        cluster_forging_writer.writerow([cluster_id, block_num, forge_end])
+                            cluster_forging_writer.writerow([cluster_id, block_num, forge_end])
                         cluster_id += 1
             i += 1
 

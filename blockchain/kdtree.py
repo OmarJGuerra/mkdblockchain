@@ -693,7 +693,29 @@ class KDNode(Node):
         return sel_func(candidates, key=max_key)
 
 
-# TODO: Add time recording to collect data.
+def verify_mkd_blockchain(root):
+    st = root.subtree_hash
+    if root.left is None and root.right is None:
+        if root.subtree_hash == '0':
+            return True
+        new_hash = BU.hash(root.data).hexdigest()
+        return new_hash == st
+    elif root.left is None:
+        if verify_mkd_blockchain(root.right):
+            return st == root.right.subtree_hash
+        else:
+            return False
+    elif root.right is None:
+        if verify_mkd_blockchain(root.left):
+            return st == root.left.subtree_hash
+        else:
+            return False
+    else:
+        if verify_mkd_blockchain(root.left) and verify_mkd_blockchain(root.right):
+            new_hash = concat_hashes(root.left.subtree_hash, root.right.subtree_hash)
+            return new_hash == root.subtree_hash
+
+
 # Want to change to create_subtree_hash or create_st_hash
 def create_subtreehash(traversed_kdnodes):
     for kdnode in reversed(traversed_kdnodes):
@@ -709,30 +731,32 @@ def create_subtreehash(traversed_kdnodes):
         else:
             kdnode.subtree_hash = BU.hash(kdnode.data.to_json()).hexdigest()
 
-# def verify_subtree_hash(root, kdnode):
-#     if kdnode != root:
-#         if kdnode.data[root.axis] < root.data[root.axis]:
-    #         if not self.left:
-    #             self.left = node
-    #             self.left.st_hash = BU.hash(self.left.data).hexdigest()
-    #             right_hash = self.right.st_hash if self.right is not None else ''
-    #             self.st_hash = concat_hashes(self.left.st_hash, right_hash)
-    #             self.left.data.parent_hash = BU.hash(self.data.to_json).hexdigest()
-    #             return self.left
-    #         else:
-    #             return self.left.add_node(node)
-    #     else:
-    #         if not self.right:
-    #             self.right = node
-    #             self.right.st_hash = BU.hash(self.right.data.to_json).hexdigest()
-    #             left_hash = self.left.st_hash if self.left is not None else ''
-    #             self.st_hash = concat_hashes(left_hash, self.right.st_hash)
-    #             self.right.data.parent_hash = BU.hash(self.data.to_json).hexdigest()
-    #             return self.right
-    #         else:
-    #             return self.right.add_node(node)
-    # else:
-    #     print("Node already in tree")
+
+def verify_subtree_hash(root, kdnode):
+    if kdnode != root:
+        if concat_hashes(root.left.subtree_hash, root.right.subtree_hash) == root.subtree_hash:
+            if kdnode.data[root.axis] < root.data[root.axis]:
+                if kdnode == root.left:
+                    if concat_hashes(root.left.left.subtree_hash, root.left.right.subtree_hash) == kdnode.subtree_hash:
+                        return print('Valid')
+                    else:
+                        return print('Invalid')
+                else:
+                    return verify_subtree_hash(root.left, kdnode)
+            else:
+                if kdnode == root.right:
+                    if concat_hashes(root.right.left.subtree_hash, root.right.right.subtree_hash) == kdnode.subtree_hash:
+                        return print('Valid')
+                    else:
+                        return print('Invalid')
+                else:
+                    return verify_subtree_hash(root.right, kdnode)
+        else:
+            print('Invalid')
+    elif kdnode.subtree_hash == root.subtree_hash:
+        print('Valid')
+    else:
+        print('Invalid')
 
 
 def concat_hashes(hash1, hash2):

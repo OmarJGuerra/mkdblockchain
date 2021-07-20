@@ -161,16 +161,20 @@ class Node:
 
         node_to_aggregate = arg[1]
         first_tree = self.blockchain.blocks
-        second_tree = node_to_aggregate.blockchain.blocks
-        merged_into_tree = first_tree if first_tree.size > second_tree.size else second_tree
-        merging_tree = first_tree if merged_into_tree != first_tree else second_tree
+        second_tree = copy.deepcopy(node_to_aggregate.blockchain.blocks)
+        node_to_aggregate.blockchain.blocks = copy.deepcopy(self.blockchain.blocks)
+        #  TODO: Add functionality for merging tree based on different factors such as size, etc.
+        merged_into_tree = first_tree  # if first_tree.size > second_tree.size else second_tree
+        merging_tree = second_tree  # first_tree if merged_into_tree != first_tree else second_tree
 
-        merging_tree_size = merging_tree.size
         merged_into_tree_size = merged_into_tree.size
+        merging_tree_size = merging_tree.size
 
         validation_time = open('validation_time.csv', mode='a')
         validation_time_writer = csv.writer(validation_time, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
+        nodes_published = 0
+        nodes_not_published = 0
         before_merge = time.time()
         for kd_node in kdtree.level_order(merging_tree):
             if kd_node.data.parent_hash == '0':
@@ -185,8 +189,12 @@ class Node:
                 if p_node_hash == kd_node.data.parent_hash:
                     # need to publish
                     self.publish(kd_node.data)
+                    nodes_published += 1
+            else:
+                nodes_not_published += 1
         after_merge = time.time() - before_merge
-        validation_time_writer.writerow([node_to_aggregate.cluster_id, merged_into_tree_size,merging_tree_size, after_merge])
+        validation_time_writer.writerow([node_to_aggregate.cluster_id, node_to_aggregate.node_id, merged_into_tree_size,
+                                         merging_tree_size, nodes_published, nodes_not_published, after_merge])
         validation_time.close()
 
 
