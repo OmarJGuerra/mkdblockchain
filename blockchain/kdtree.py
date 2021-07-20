@@ -698,13 +698,13 @@ class KDNode(Node):
 def create_subtreehash(traversed_kdnodes):
     for kdnode in reversed(traversed_kdnodes):
         if kdnode.left is not None and kdnode.right is not None:
-            print(f'Left: {kdnode.left.subtree_hash} Right: {kdnode.right.subtree_hash}')
+            #print(f'Left: {kdnode.left.subtree_hash} Right: {kdnode.right.subtree_hash}')
             kdnode.subtree_hash = concat_hashes(kdnode.left.subtree_hash, kdnode.right.subtree_hash)
         elif kdnode.left is not None and kdnode.right is None:
-            print(f'Left: {kdnode.left.subtree_hash}')
+            #print(f'Left: {kdnode.left.subtree_hash}')
             kdnode.subtree_hash = kdnode.left.subtree_hash
         elif kdnode.right is not None and kdnode.left is None:
-            print(f'Right: {kdnode.right.subtree_hash}')
+            #print(f'Right: {kdnode.right.subtree_hash}')
             kdnode.subtree_hash = kdnode.right.subtree_hash
         else:
             kdnode.subtree_hash = BU.hash(kdnode.data.to_json()).hexdigest()
