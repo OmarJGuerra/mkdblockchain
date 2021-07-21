@@ -197,7 +197,7 @@ class KDNode(Node):
     """A Node that contains kd-tree specific data and methods."""
 
     def __init__(self, data=None, left=None, right=None, axis=None,
-                 sel_axis=None, dimensions=None, st_hash=None):
+                 sel_axis=None, dimensions=None, size=0, st_hash=None):
         """
         Creates a new node for a kd-tree.
 
@@ -212,7 +212,7 @@ class KDNode(Node):
         self.axis = axis
         self.sel_axis = sel_axis
         self.dimensions = dimensions
-        self.size = 0
+        self.size = size
         self.st_hash = st_hash
         if left is None and right is None:
             self.subtree_hash = BU.hash(self.data).hexdigest()
@@ -827,7 +827,7 @@ def create(point_list=None, dimensions=None, axis=0, sel_axis=None):
 def create_root(dimensions, genesis_node_id, forger, sel_axis=None):
     sel_axis = sel_axis or (lambda prev_axis: (prev_axis + 1) % dimensions)
     g_block = block.Block.genesis(genesis_node_id, forger)
-    return KDNode(g_block, left=None, right=None, axis=0, sel_axis=sel_axis, st_hash='0')
+    return KDNode(g_block, left=None, right=None, axis=0, sel_axis=sel_axis, size=1, st_hash='0')
 
 
 def check_dimensionality(point_list, dimensions=None):
