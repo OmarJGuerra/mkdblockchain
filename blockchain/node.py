@@ -63,9 +63,8 @@ class Node:
         pub.unsubscribe(self.node_listener, old_topic)  # core.TopicManager.getTopicsSubscribed(listener))
         pub.subscribe(self.node_listener, new_topic)
 
-    # TODO: fix handlers to use publish instead of p2p
     def publish(self, message):
-        cluster = '1.c' + str(self.cluster_id).strip()  # TODO: more permanent fix to the multithreading cluster publish
+        cluster = str(self.test_num).strip() + '.c' + str(self.cluster_id).strip()  # TODO: more permanent fix to the multithreading cluster publish
         pub.sendMessage(cluster, arg=message)
 
     # TODO: Verify function of handle_sensor_transaction

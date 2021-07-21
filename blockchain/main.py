@@ -94,8 +94,6 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
                         forger = cluster.next_forger()
                         #  if transaction pool not empty then forge and broadcast
                         for node in cluster.member_nodes:
-                            print(f'node: {node}')
-                            print(f'node.blockchain: {node.blockchain}')
                             if node.wallet.public_key_string() == forger and \
                                node.transaction_pool.transactions is not []:
                                 forge_begin = time.time()
