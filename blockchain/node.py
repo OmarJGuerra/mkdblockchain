@@ -159,7 +159,7 @@ class Node:
 
         node_to_aggregate = arg[1]
         first_tree = self.blockchain.blocks
-        second_tree = copy.deepcopy(node_to_aggregate.blockchain.blocks)
+        second_tree = node_to_aggregate.blockchain.blocks
         #  TODO: Add functionality for merging tree based on different factors such as size, etc.
         merged_into_tree = first_tree  # if first_tree.size > second_tree.size else second_tree
         merging_tree = second_tree  # first_tree if merged_into_tree != first_tree else second_tree
@@ -185,6 +185,7 @@ class Node:
                 #  print(f'p_node_hash: {p_node_hash}, kd_node.data.parent_hash: {kd_node.data.parent_hash}')
                 if p_node_hash == kd_node.data.parent_hash:
                     # need to publish
+                    kd_node.size = 0
                     self.publish(kd_node.data)
                     nodes_published += 1
             else:

@@ -197,7 +197,7 @@ class KDNode(Node):
     """A Node that contains kd-tree specific data and methods."""
 
     def __init__(self, data=None, left=None, right=None, axis=None,
-                 sel_axis=None, dimensions=None, size=0, st_hash=None):
+                 sel_axis=None, dimensions=None, size=0, right_size=0, left_size=0, st_hash=None):
         """
         Creates a new node for a kd-tree.
 
@@ -213,6 +213,8 @@ class KDNode(Node):
         self.sel_axis = sel_axis
         self.dimensions = dimensions
         self.size = size
+        self.right_size = right_size
+        self.left_size = left_size
         self.st_hash = st_hash
         if left is None and right is None:
             self.subtree_hash = BU.hash(self.data).hexdigest()
@@ -249,7 +251,6 @@ class KDNode(Node):
         Users should call add() only to the topmost tree.
         """
 
-
         current = self
         # print(f'current.left: {current.left} current.right: {current.right}')
 
@@ -266,6 +267,7 @@ class KDNode(Node):
             # split on self.axis, recurse either left or right
             if int(point[current.axis]) < int(current.data[current.axis]):
                 if current.left is None:
+                    self.left_size += 1
                     parent = current.data
                     current.left = current.create_subnode(point)
                     current.size += 1
@@ -278,6 +280,7 @@ class KDNode(Node):
                     traversed_kdnodes.append(current)
             else:
                 if current.right is None:
+                    self.right_size += 1
                     parent = current.data
                     current.right = current.create_subnode(point)
                     current.size += 1
