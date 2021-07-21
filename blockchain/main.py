@@ -87,16 +87,15 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
                     transaction = SensorTransaction(node.wallet.public_key_string(), random.randint(0, 1000))
                     node.publish(transaction)
 
-                # block_num = 0
                 # if time to forge then forge and broadcast, needs to scan and perform all clusters
                 if int(parts[1]) % forge_interval == 0:
-                    # block_num += 1
-                    #cluster_id = 1
                     for cluster in clusters:
                         #  choose a forger
                         forger = cluster.next_forger()
                         #  if transaction pool not empty then forge and broadcast
                         for node in cluster.member_nodes:
+                            print(f'node: {node}')
+                            print(f'node.blockchain: {node.blockchain}')
                             if node.wallet.public_key_string() == forger and \
                                node.transaction_pool.transactions is not []:
                                 forge_begin = time.time()
@@ -109,7 +108,6 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
                                                                     quoting=csv.QUOTE_MINIMAL)
                                     branch_size_writer.writerow([node.cluster_id, node.node_id, left_size, right_size])
                                 cluster_forging_writer.writerow([node.cluster_id, node.node_id, node.blockchain_size, forge_end])
-                        #cluster_id += 1
             i += 1
 
     # now = time.time() - then
