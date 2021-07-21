@@ -270,11 +270,11 @@ class KDNode(Node):
                     self.left_size += 1
                     parent = current.data
                     current.left = current.create_subnode(point)
-                    current.size += 1
                     traversed_kdnodes.append(current.left)
                     # print(f'Traversed kd Nodes: {traversed_kdnodes}')
                     return current.left, parent, traversed_kdnodes
                 else:
+                    current.size += 1
                     current = current.left
                     traversed_kdnodes.append(current)
             else:
@@ -282,11 +282,11 @@ class KDNode(Node):
                     self.right_size += 1
                     parent = current.data
                     current.right = current.create_subnode(point)
-                    current.size += 1
                     traversed_kdnodes.append(current.right)
                     # print(f'Traversed kd Nodes: {traversed_kdnodes}')
                     return current.right, parent, traversed_kdnodes
                 else:
+                    current.size += 1
                     current = current.right
                     traversed_kdnodes.append(current)
 
