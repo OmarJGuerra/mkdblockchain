@@ -83,6 +83,12 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
             if j == (num_nodes - 1):
                 cycles += 1
                 print(f'Number of cycles for test {test_num}: {cycles}')
+                for node in nodes:
+                    left_size, right_size = node.blockchain.blocks.get_left_right_size()
+                    with open(f'branch_size_left_right_{test_num}.csv', mode='a') as branch_size:
+                        branch_size_writer = csv.writer(branch_size, delimiter='.', quotechar='"',
+                                                        quoting=csv.QUOTE_MINIMAL)
+                        branch_size_writer.writerow([cycles, node.cluster_id, node.node_id, left_size, right_size])
                 for node in nodes_transacting:
                     transaction = SensorTransaction(node.wallet.public_key_string(), random.randint(0, 1000))
                     node.publish(transaction)
@@ -99,11 +105,6 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
                                 forge_begin = time.time()
                                 node.mkd_forge()
                                 forge_end = time.time() - forge_begin
-                                left_size, right_size = node.blockchain.blocks.get_left_right_size()
-                                with open(f'branch_size_left_right_{test_num}.csv', mode='a') as branch_size:
-                                    branch_size_writer = csv.writer(branch_size, delimiter='.', quotechar='"',
-                                                                    quoting=csv.QUOTE_MINIMAL)
-                                    branch_size_writer.writerow([node.cluster_id, node.node_id, left_size, right_size])
                                 cluster_forging_writer.writerow([node.cluster_id, node.node_id, node.blockchain_size, forge_end])
             i += 1
 

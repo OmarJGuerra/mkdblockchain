@@ -222,9 +222,6 @@ class Node:
             print('i am not the forger')
 
     def mkd_forge(self):
-        # needs to pick forger
-
-        print('I am the forger: ')
         block_data = self.blockchain.create_block(self.transaction_pool.transactions, self.wallet, self.node_id)
         self.transaction_pool.remove_from_pool(self.transaction_pool.transactions)
         block = block_data[0]
