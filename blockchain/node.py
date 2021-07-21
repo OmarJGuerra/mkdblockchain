@@ -181,7 +181,7 @@ class Node:
                 # print(f'getting the kdnode: {kd_node}')
                 # print(f'node_to_aggregate.blockchain.get_parent(kd_node): {node_to_aggregate.blockchain.get_parent(kd_node)}')
                 p_node = node_to_aggregate.blockchain.get_parent(kd_node)
-                p_node_hash = BlockchainUtils.hash(p_node.data.to_json()).hexdigest() # added hexdigest
+                p_node_hash = BlockchainUtils.hash(p_node.data.to_json()).hexdigest()  # added hexdigest
                 # print(f'p_node_hash: {p_node_hash}, kd_node.data.parent_hash: {kd_node.data.parent_hash}')
                 if p_node_hash == kd_node.data.parent_hash:
                     # need to publish
@@ -196,6 +196,7 @@ class Node:
         validation_time.close()
         node_to_aggregate.blockchain = copy.deepcopy(self.blockchain)
         node_to_aggregate.blockchain_size = copy.deepcopy(self.blockchain_size)
+        node_to_aggregate.transaction_pool = copy.deepcopy(self.transaction_pool)
 
         # TODO:
         # for first_node, second_node in itertools.zip_longest(self.blockchain.blocks.level_order(),
