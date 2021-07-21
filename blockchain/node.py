@@ -64,7 +64,7 @@ class Node:
         pub.subscribe(self.node_listener, new_topic)
 
     def publish(self, message):
-        cluster = str(self.test_num).strip() + '.c' + str(self.cluster_id).strip()  # TODO: more permanent fix to the multithreading cluster publish
+        cluster = f'{self.test_num}.c{self.cluster_id}'
         pub.sendMessage(cluster, arg=message)
 
     # TODO: Verify function of handle_sensor_transaction
