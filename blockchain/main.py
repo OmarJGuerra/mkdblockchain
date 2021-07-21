@@ -36,7 +36,7 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
     # initialize each cluster
     clusters = []
     for i in range(num_clusters):
-        new_cluster = Cluster(i + 1)
+        new_cluster = Cluster(i + 1, test_num)
         new_cluster.start_listener(f'{test_num}.c{i+1}')
         clusters.append(new_cluster)
 

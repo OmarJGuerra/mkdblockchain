@@ -16,7 +16,7 @@ class Cluster:
         self.member_nodes = []
         self.pos = ProofOfStake()
 
-        pub.subscribe(self.cluster_listener, 'c' + str(self.cluster_id).strip())
+        pub.subscribe(self.cluster_listener, self.cluster_topic)
 
     def next_forger(self):
         seed = hash(self)
