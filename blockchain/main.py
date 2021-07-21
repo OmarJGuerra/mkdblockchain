@@ -50,6 +50,9 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
     # completed_broadcast = time.time() - start_broadcast
     # print(f'time to complete broadcast to {num_nodes} nodes: {completed_broadcast}')
 
+    for i in range(num_nodes):
+        print(nodes[i].blockchain)
+
     # %%
 
     # Opens the data set file and generates nodes based on the provided data.
