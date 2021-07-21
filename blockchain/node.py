@@ -186,7 +186,6 @@ class Node:
                 #  print(f'p_node_hash: {p_node_hash}, kd_node.data.parent_hash: {kd_node.data.parent_hash}')
                 if p_node_hash == kd_node.data.parent_hash:
                     # need to publish
-                    kd_node.size = 0
                     self.publish(kd_node.data)
                     nodes_published += 1
             else:
