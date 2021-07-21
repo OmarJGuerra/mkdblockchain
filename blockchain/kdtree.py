@@ -275,7 +275,6 @@ class KDNode(Node):
                     # print(f'Traversed kd Nodes: {traversed_kdnodes}')
                     return current.left, parent, traversed_kdnodes
                 else:
-                    current.size += 1
                     current = current.left
                     traversed_kdnodes.append(current)
             else:
@@ -288,7 +287,6 @@ class KDNode(Node):
                     # print(f'Traversed kd Nodes: {traversed_kdnodes}')
                     return current.right, parent, traversed_kdnodes
                 else:
-                    current.size += 1
                     current = current.right
                     traversed_kdnodes.append(current)
 
