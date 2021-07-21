@@ -130,8 +130,6 @@ class Node:
 
     # TODO: Need to add functionality for when blockchain is broadcast after merge and confirm function of deepcopy
     def handle_blockchain(self, blockchain):
-        print(f'handle_blockchain blockchain: {blockchain}')
-        print(f'handle_blockchain len(blockchain.blocks): {len(blockchain.blocks)}')
         if len(blockchain.blocks) == 1:
             self.blockchain = copy.deepcopy(blockchain)
             self.blockchain.chain_id = self.cluster_id
