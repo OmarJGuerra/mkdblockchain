@@ -101,7 +101,6 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
                                 forge_begin = time.time()
                                 node.mkd_forge()
                                 forge_end = time.time() - forge_begin
-                            if node.blockchain:
                                 left_size, right_size = node.blockchain.blocks.get_left_right_size()
                                 with open(f'branch_size_left_right_{test_num}.csv', mode='a') as branch_size:
                                     branch_size_writer = csv.writer(branch_size, delimiter='.', quotechar='"',
