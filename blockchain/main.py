@@ -42,6 +42,7 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
 
     genesis_forger = nodes[genesis_node_id - 1].wallet.public_key_string()
     mkd_blockchain = MKDBlockchain(dimensions, genesis_node_id, genesis_forger)
+    print(f'mkd_blockchain: {mkd_blockchain}')
 
     publisher = nodes[genesis_node_id - 1]
 
