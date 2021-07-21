@@ -182,9 +182,7 @@ class Node:
                 # print(f'node_to_aggregate.blockchain.get_parent(kd_node): {node_to_aggregate.blockchain.get_parent(kd_node)}')
                 p_node = node_to_aggregate.blockchain.get_parent(kd_node)
                 p_node_hash = BlockchainUtils.hash(p_node.data).hexdigest()  # added hexdigest
-                print(f'p_node: {p_node}')
-                print(f'p_node_hash: {p_node_hash}')
-                #  print(f'p_node_hash: {p_node_hash}, kd_node.data.parent_hash: {kd_node.data.parent_hash}')
+                print(f'p_node_hash: {p_node_hash}, kd_node.data.parent_hash: {kd_node.data.parent_hash}')
                 if p_node_hash == kd_node.data.parent_hash:
                     # need to publish
                     self.publish(kd_node.data)
