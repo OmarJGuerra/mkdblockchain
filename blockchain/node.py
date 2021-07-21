@@ -98,7 +98,6 @@ class Node:
                 self.forge()
 
     def handle_block(self, block):
-        print(f'Node {self.node_id} received block {block}')
         self.blockchain.blocks.add(block)
         self.blockchain_size += 1
         self.transaction_pool.remove_from_pool(block.transactions)
