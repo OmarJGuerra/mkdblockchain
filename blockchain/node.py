@@ -65,8 +65,8 @@ class Node:
 
     # TODO: fix handlers to use publish instead of p2p
     def publish(self, message):
-        cluster = 'c' + str(self.cluster_id).strip()
-        pub.sendMessage(cluster, arg=message)
+        # cluster = 'c' + str(self.cluster_id).strip()
+        pub.sendMessage(self.cluster_id, arg=message)
 
     # TODO: Verify function of handle_sensor_transaction
     def handle_sensor_transaction(self, sensor_transaction):
