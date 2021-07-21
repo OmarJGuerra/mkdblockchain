@@ -25,7 +25,7 @@ class Node:
         self.cluster_id = cluster_id
         # self.port = port
         self.blockchain = blockchain
-        self.blockchain_size = 0
+        self.blockchain_size = 1
         self.transaction_pool = TransactionPool()
         self.wallet = Wallet()
         self.coords = [0.0, 0.0]
@@ -157,7 +157,7 @@ class Node:
         if agg_pub_key != self.wallet.public_key_string():
             return
 
-        node_to_aggregate = arg[1]
+        node_to_aggregate = arg[1]  # node received
         first_tree = self.blockchain.blocks
         second_tree = node_to_aggregate.blockchain.blocks
         #  TODO: Add functionality for merging tree based on different factors such as size, etc.
@@ -181,11 +181,14 @@ class Node:
                 # print(f'getting the kdnode: {kd_node}')
                 # print(f'node_to_aggregate.blockchain.get_parent(kd_node): {node_to_aggregate.blockchain.get_parent(kd_node)}')
                 p_node = node_to_aggregate.blockchain.get_parent(kd_node)
-                p_node_hash = BlockchainUtils.hash(p_node.data)
+                p_node_hash = BlockchainUtils.hash(p_node.data).hexdigest()  # added hexdigest
+                print(f'p_node: {p_node}')
+                print(f'p_node_hash: {p_node_hash}')
                 #  print(f'p_node_hash: {p_node_hash}, kd_node.data.parent_hash: {kd_node.data.parent_hash}')
                 if p_node_hash == kd_node.data.parent_hash:
                     # need to publish
                     self.publish(kd_node.data)
+                    print(f'merge block published: {kd_node.data}')
                     nodes_published += 1
             else:
                 nodes_not_published += 1

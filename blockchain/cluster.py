@@ -38,8 +38,8 @@ class Cluster:
     def handle_node(self, node):
         #print(f'cluster {self.cluster_id} is handling node {node}')
         if node not in self.member_nodes:
-            self.member_nodes.append(node)
             agg_pub_key = self.next_forger()
+            self.member_nodes.append(node)
             self.publish([agg_pub_key, node])
             self.pos.update(node.wallet.public_key_string(), 10)
         else:
