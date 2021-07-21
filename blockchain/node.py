@@ -194,7 +194,7 @@ class Node:
         validation_time_writer.writerow([node_to_aggregate.cluster_id, node_to_aggregate.node_id, merged_into_tree_size,
                                          merging_tree_size, nodes_published, nodes_not_published, after_merge])
         validation_time.close()
-        node_to_aggregate.blockchain.blocks = copy.deepcopy(self.blockchain.blocks)
+        node_to_aggregate.blockchain = copy.deepcopy(self.blockchain)
         node_to_aggregate.blockchain_size = copy.deepcopy(self.blockchain_size)
 
         # TODO:
