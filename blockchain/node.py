@@ -98,9 +98,10 @@ class Node:
                 self.forge()
 
     def handle_block(self, block):
-            self.blockchain.blocks.add(block)
-            self.blockchain_size += 1
-            self.transaction_pool.remove_from_pool(block.transactions)
+        print(f'Node {self.node_id} received block {block}')
+        self.blockchain.blocks.add(block)
+        self.blockchain_size += 1
+        self.transaction_pool.remove_from_pool(block.transactions)
         # for transaction in block.transactions:
         #     if self.transaction_pool.transaction_exists(transaction):
         #         self.transaction_pool.remove_from_pool(transaction)
@@ -232,6 +233,7 @@ class Node:
         cluster_topic = f'{self.test_num}.c{self.cluster_id}'
         pub.unsubscribe(self.node_listener, cluster_topic)
         self.publish(block)
+        self.blockchain_size += 1
         pub.subscribe(self.node_listener, cluster_topic)
 
     def request_chain(self):
