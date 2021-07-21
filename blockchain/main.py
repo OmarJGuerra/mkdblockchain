@@ -115,10 +115,9 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
 
 # run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions):
 if __name__ == '__main__':
-    run_sim_thread(1, 16, 80, 10, 4)
+    # run_sim_thread(1, 16, 80, 10, 4)
 
-    '''
-        Regular Threading Method
+    # Regular Threading Method
     test_1 = threading.Thread(target=run_sim_thread, args=(1, 16, 80, 20, 4))
     test_2 = threading.Thread(target=run_sim_thread, args=(2, 16, 80, 30, 4))
     test_3 = threading.Thread(target=run_sim_thread, args=(3, 16, 80, 40, 4))
@@ -130,7 +129,7 @@ if __name__ == '__main__':
     test_1.join()
     test_2.join()
     test_3.join()
-    '''
+
 
     '''
         Executor Method
