@@ -160,7 +160,6 @@ class Node:
         node_to_aggregate = arg[1]
         first_tree = self.blockchain.blocks
         second_tree = copy.deepcopy(node_to_aggregate.blockchain.blocks)
-        node_to_aggregate.blockchain.blocks = copy.deepcopy(self.blockchain.blocks)
         #  TODO: Add functionality for merging tree based on different factors such as size, etc.
         merged_into_tree = first_tree  # if first_tree.size > second_tree.size else second_tree
         merging_tree = second_tree  # first_tree if merged_into_tree != first_tree else second_tree
@@ -194,6 +193,7 @@ class Node:
         validation_time_writer.writerow([node_to_aggregate.cluster_id, node_to_aggregate.node_id, merged_into_tree_size,
                                          merging_tree_size, nodes_published, nodes_not_published, after_merge])
         validation_time.close()
+        node_to_aggregate.blockchain.blocks = copy.deepcopy(self.blockchain.blocks)
 
         # TODO:
         # for first_node, second_node in itertools.zip_longest(self.blockchain.blocks.level_order(),
