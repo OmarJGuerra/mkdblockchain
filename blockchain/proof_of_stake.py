@@ -9,7 +9,7 @@ class ProofOfStake:
         self.set_genesis_node_stake()
 
     def set_genesis_node_stake(self):
-        genesis_public_key = open('blockchain/keys/genesisPublicKey.pem', 'r').read()  # added blockchain to file path
+        genesis_public_key = open('keys/genesisPublicKey.pem', 'r').read()  # added blockchain to file path
         self.stakers[genesis_public_key] = 10
 
     def update(self, public_key_string, stake):
