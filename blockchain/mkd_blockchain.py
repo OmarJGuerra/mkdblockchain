@@ -24,7 +24,6 @@ class MKDBlockchain:
         for block in self.blocks.inorder():
             json_blocks.append(block.to_json())
         j_data['blocks'] = json_blocks
-        j_data['account_model'] = self.account_model.to_json()
         j_data['pos'] = self.pos.to_json()
         return j_data
 

@@ -98,9 +98,9 @@ class Node:
                 self.forge()
 
     def handle_block(self, block):
-        self.blockchain.blocks.add(block)
-        self.blockchain_size += 1
-        self.transaction_pool.remove_from_pool(block.transactions)
+            self.blockchain.blocks.add(block)
+            self.blockchain_size += 1
+            self.transaction_pool.remove_from_pool(block.transactions)
         # for transaction in block.transactions:
         #     if self.transaction_pool.transaction_exists(transaction):
         #         self.transaction_pool.remove_from_pool(transaction)
@@ -195,6 +195,7 @@ class Node:
                                          merging_tree_size, nodes_published, nodes_not_published, after_merge])
         validation_time.close()
         node_to_aggregate.blockchain.blocks = copy.deepcopy(self.blockchain.blocks)
+        node_to_aggregate.blockchain_size = copy.deepcopy(self.blockchain_size)
 
         # TODO:
         # for first_node, second_node in itertools.zip_longest(self.blockchain.blocks.level_order(),
@@ -228,7 +229,10 @@ class Node:
         block = block_data[0]
         block.parent_hash = BlockchainUtils.hash(block_data[1].to_json()).hexdigest()
         kdtree.create_subtree_hash(block_data[2])
+        cluster_topic = f'{self.test_num}.c{self.cluster_id}'
+        pub.unsubscribe(self.node_listener, cluster_topic)
         self.publish(block)
+        pub.subscribe(self.node_listener, cluster_topic)
 
     def request_chain(self):
         message = Message(self.p2p.socketConnector, 'BLOCKCHAINREQUEST', None)

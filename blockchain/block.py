@@ -28,10 +28,11 @@ class Block(dict):
 
     def __repr__(self):
         # return f'Block({self.coords}, {self.forger}, {self.parent_hash}, {self.transactions})'
-        return f'Block({self.coords}, {self.transactions},\n' \
-               f'{self.parent_hash},\n' \
-               f'{self.forger},\n' \
-               f'{self.signature})'
+        # return f'Block({self.coords}, {self.transactions},\n' \
+        #        f'{self.parent_hash},\n' \
+        #        f'{self.forger},\n' \
+        #        f'{self.signature})'
+        return f'Block({self.coords})'
 
     def __hash__(self):
         return BU.hash(self)
