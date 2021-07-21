@@ -293,6 +293,7 @@ class KDNode(Node):
                     traversed_kdnodes.append(current)
 
 
+    # I don't think .size is working now
     def get_left_right_size(self):
         left_size = self.left.size if self.left is not None else 0
         right_size = self.right.size if self.right is not None else 0
