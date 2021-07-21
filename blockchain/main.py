@@ -42,7 +42,6 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
 
     genesis_forger = nodes[genesis_node_id - 1].wallet.public_key_string()
     mkd_blockchain = MKDBlockchain(dimensions, genesis_node_id, genesis_forger)
-    print(f'mkd_blockchain: {mkd_blockchain}')
 
     publisher = nodes[genesis_node_id - 1]
 
@@ -50,9 +49,6 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
     publisher.publish(mkd_blockchain)
     # completed_broadcast = time.time() - start_broadcast
     # print(f'time to complete broadcast to {num_nodes} nodes: {completed_broadcast}')
-
-    for i in range(num_nodes):
-        print(nodes[i].blockchain)
 
     # %%
 
