@@ -1,3 +1,5 @@
+import random
+
 from blockchain_utils import BlockchainUtils
 from node import Node
 from proof_of_stake import ProofOfStake
@@ -38,10 +40,8 @@ class Cluster:
     def handle_node(self, node):
         #print(f'cluster {self.cluster_id} is handling node {node}')
         if node not in self.member_nodes:
-            if len(self.member_nodes) == 1:
-                agg_pub_key = self.member_nodes[0].wallet.public_key_string()
-            else:
-                agg_pub_key = self.next_forger()
+            agg_pub_key = random.choice(self.member_nodes).wallet.public_key_string()
+            #agg_pub_key = self.next_forger()
             self.member_nodes.append(node)
             self.publish([agg_pub_key, node])
             self.pos.update(node.wallet.public_key_string(), 10)

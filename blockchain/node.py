@@ -177,9 +177,6 @@ class Node:
             if kd_node.data.parent_hash == '0':
                 continue
             if not merged_into_tree.node_in_tree(kd_node):
-                # print(f'node_to_aggregate: {node_to_aggregate}')
-                # print(f'getting the kdnode: {kd_node}')
-                # print(f'node_to_aggregate.blockchain.get_parent(kd_node): {node_to_aggregate.blockchain.get_parent(kd_node)}')
                 p_node = node_to_aggregate.blockchain.get_parent(kd_node)
                 p_node_hash = BlockchainUtils.hash(p_node.data.to_json()).hexdigest()  # added hexdigest
                 # print(f'p_node_hash: {p_node_hash}, kd_node.data.parent_hash: {kd_node.data.parent_hash}')
@@ -191,8 +188,9 @@ class Node:
             else:
                 nodes_not_published += 1
         after_merge = time.time() - before_merge
-        validation_time_writer.writerow([node_to_aggregate.cluster_id, node_to_aggregate.node_id, merged_into_tree_size,
-                                         merging_tree_size, nodes_published, nodes_not_published, after_merge])
+        validation_time_writer.writerow([node_to_aggregate.cluster_id, node_to_aggregate.node_id,
+                                         node_to_aggregate.node_id, merging_tree_size, nodes_published,
+                                         nodes_not_published, after_merge])
         validation_time.close()
         node_to_aggregate.blockchain = copy.deepcopy(self.blockchain)
         node_to_aggregate.blockchain_size = copy.deepcopy(self.blockchain_size)
