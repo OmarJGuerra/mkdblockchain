@@ -194,6 +194,7 @@ class Node:
         validation_time.close()
         node_to_aggregate.blockchain = copy.deepcopy(self.blockchain)
         node_to_aggregate.blockchain_size = copy.deepcopy(self.blockchain_size)
+        node_to_aggregate.blockchain.blocks.size = copy.deepcopy(self.blockchain.blocks.size)
         node_to_aggregate.transaction_pool = copy.deepcopy(self.transaction_pool)
 
         # TODO:
