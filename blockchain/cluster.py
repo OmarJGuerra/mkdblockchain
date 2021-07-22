@@ -36,10 +36,10 @@ class Cluster:
 
     # publish self to old cluster: handler will see different cluster id and remove from PO
     # publish self to new cluster: handler will see same cluster id and add to POS
-    # TODO: need to change to use real values
     def handle_node(self, node):
         #print(f'cluster {self.cluster_id} is handling node {node}')
         if node not in self.member_nodes:
+            # TODO: Need to find issue with proof of stake and reinsert function here.
             if len(self.member_nodes) != 0:
                 agg_pub_key = random.choice(self.member_nodes).wallet.public_key_string()
                 self.publish([agg_pub_key, node])
