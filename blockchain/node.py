@@ -188,7 +188,7 @@ class Node:
             else:
                 nodes_not_published += 1
         after_merge = time.time() - before_merge
-        validation_time_writer.writerow([node_to_aggregate.cluster_id, node_to_aggregate.node_id,
+        validation_time_writer.writerow([self.cluster_id, self.node_id,
                                          node_to_aggregate.node_id, merging_tree_size, nodes_published,
                                          nodes_not_published, after_merge])
         validation_time.close()
