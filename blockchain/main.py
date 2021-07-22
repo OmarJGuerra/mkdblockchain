@@ -28,7 +28,7 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
 
     # iterate and initialize each node
     for i in range(num_nodes):
-        new_node = Node(test_num, i + 1, 0)
+        new_node = Node(test_num, i + 1, f'{test_num}.c0')
         # new_node.blockchain = mkd_blockchain
         new_node.start_listener(f'{test_num}.c0')
         nodes.append(new_node)
@@ -71,8 +71,8 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
             moving_node.coords = [float(parts[2]), float(parts[3])]
 
             # identifying old and new cluster and calling the move function to perform the needed changes
-            old_cluster_id = int(moving_node.cluster_id)
-            new_cluster_id = int(parts[5])
+            old_cluster_id = moving_node.cluster_id
+            new_cluster_id = f'{test_num}.c{parts[5]}'
             moving_node.move_node(old_cluster_id, new_cluster_id)
 
             #  generates list of nodes that need to publish a transaction to their cluster
@@ -88,7 +88,7 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
                     with open(f'branch_size_left_right_{test_num}.csv', mode='a') as branch_size:
                         branch_size_writer = csv.writer(branch_size, delimiter='.', quotechar='"',
                                                         quoting=csv.QUOTE_MINIMAL)
-                        branch_size_writer.writerow([cycles, node.cluster_id, node.node_id, node.blockchain.blocks.size, left_size, right_size])
+                        branch_size_writer.writerow([cycles, node.cluster_id, node.node_id, node.blockchain_size, left_size, right_size])
                 for node in nodes_transacting:
                     transaction = SensorTransaction(node.wallet.public_key_string(), random.randint(0, 1000))
                     node.publish(transaction)

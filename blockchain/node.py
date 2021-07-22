@@ -64,7 +64,7 @@ class Node:
         pub.subscribe(self.node_listener, new_topic)
 
     def publish(self, message):
-        cluster = f'{self.test_num}.c{self.cluster_id}'
+        cluster = self.cluster_id
         pub.sendMessage(cluster, arg=message)
 
     # TODO: Verify function of handle_sensor_transaction
@@ -230,7 +230,7 @@ class Node:
         block = block_data[0]
         block.parent_hash = BlockchainUtils.hash(block_data[1].to_json()).hexdigest()
         kdtree.create_subtree_hash(block_data[2])
-        cluster_topic = f'{self.test_num}.c{self.cluster_id}'
+        cluster_topic = self.cluster_id
         pub.unsubscribe(self.node_listener, cluster_topic)
         self.publish(block)
         self.blockchain_size += 1
@@ -242,8 +242,8 @@ class Node:
 
     def move_node(self, old_cluster_id, new_cluster_id):
         # node will change cluster id to new cluster
-        old_topic = f'{self.test_num}.c{old_cluster_id}'  # + str(old_cluster_id).strip()
-        new_topic = f'{self.test_num}.c{new_cluster_id}'  # + str(new_cluster_id).strip()
+        old_topic = old_cluster_id #f'{self.test_num}.c{old_cluster_id}'  # + str(old_cluster_id).strip()
+        new_topic = new_cluster_id  #f'{self.test_num}.c{new_cluster_id}'  # + str(new_cluster_id).strip()
         # old_cluster_size = len(self.blockchain.pos.stakers)
 
         if old_topic != new_topic:
