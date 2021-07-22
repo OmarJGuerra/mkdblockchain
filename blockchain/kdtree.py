@@ -268,6 +268,7 @@ class KDNode(Node):
             if int(point[current.axis]) < int(current.data[current.axis]):
                 if current.left is None:
                     self.left_size += 1
+                    current.size += 1
                     parent = current.data
                     current.left = current.create_subnode(point)
                     traversed_kdnodes.append(current.left)
@@ -280,6 +281,7 @@ class KDNode(Node):
             else:
                 if current.right is None:
                     self.right_size += 1
+                    current.size += 1
                     parent = current.data
                     current.right = current.create_subnode(point)
                     traversed_kdnodes.append(current.right)
