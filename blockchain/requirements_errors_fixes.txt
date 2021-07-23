@@ -5,6 +5,7 @@ Flask-Classful==0.14.2
 p2pnetwork==0.0.3
 requests==2.22.0
 pycrypto==2.6.1
+pypubsub
 
 
 
