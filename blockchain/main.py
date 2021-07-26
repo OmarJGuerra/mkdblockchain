@@ -122,17 +122,38 @@ if __name__ == '__main__':
 
 
     # Process Method
-    test_1 = multiprocessing.Process(target=run_sim_thread, args=(1, 16, 80, 20, 4))
-    test_2 = multiprocessing.Process(target=run_sim_thread, args=(2, 16, 80, 30, 4))
-    test_3 = multiprocessing.Process(target=run_sim_thread, args=(3, 16, 80, 40, 4))
+    test_1 = multiprocessing.Process(target=run_sim_thread, args=(1, 16, 80, 10, 4))
+    test_2 = multiprocessing.Process(target=run_sim_thread, args=(2, 16, 80, 20, 4))
+    test_3 = multiprocessing.Process(target=run_sim_thread, args=(3, 16, 80, 30, 4))
+    test_4 = multiprocessing.Process(target=run_sim_thread, args=(4, 16, 80, 40, 4))
+    test_5 = multiprocessing.Process(target=run_sim_thread, args=(5, 16, 80, 50, 4))
+    test_6 = multiprocessing.Process(target=run_sim_thread, args=(6, 16, 80, 60, 4))
+    test_7 = multiprocessing.Process(target=run_sim_thread, args=(7, 16, 80, 70, 4))
+    test_8 = multiprocessing.Process(target=run_sim_thread, args=(8, 16, 80, 80, 4))
+    test_9 = multiprocessing.Process(target=run_sim_thread, args=(9, 16, 80, 90, 4))
+    test_10 = multiprocessing.Process(target=run_sim_thread, args=(10, 16, 80, 100, 4))
 
     test_1.start()
     test_2.start()
     test_3.start()
+    test_4.start()
+    test_5.start()
+    test_6.start()
+    test_7.start()
+    test_8.start()
+    test_9.start()
+    test_10.start()
 
     test_1.join()
     test_2.join()
     test_3.join()
+    test_4.join()
+    test_5.join()
+    test_6.join()
+    test_7.join()
+    test_8.join()
+    test_9.join()
+    test_10.join()
 
 
     # # Regular Threading Method
