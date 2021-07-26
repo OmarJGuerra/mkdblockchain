@@ -7,11 +7,11 @@ from blockchain_utils import BlockchainUtils as BU
 # Should be changed to be more robust at a later time.
 class Block(dict):
     # def __init__(self, transactions, parent_hash, x, y, forger, block_count):
-    def __init__(self, transactions, x, y, forger, t=time.time(), parent_hash=None, signature=''):
+    def __init__(self, transactions,node_id, x, y, forger, t=time.time(), parent_hash=None, signature=''):
         # TODO: REMOVED node_id dimension, need to place it back
         dict.__init__(self)
         # self.block_count = block
-        self.coords = [x, y, t]
+        self.coords = [node_id, x, y, t]
         self.transactions = transactions
         self.parent_hash = parent_hash
         self.forger = forger
@@ -40,7 +40,7 @@ class Block(dict):
 
     @staticmethod
     def genesis(genesis_node_id, forger):
-        genesis_block = Block([], x=0, y=0, forger=forger, parent_hash='0')
+        genesis_block = Block([], genesis_node_id, x=0, y=0, forger=forger, parent_hash='0')
         # genesis_block.timestamp = 0
         return genesis_block
 
