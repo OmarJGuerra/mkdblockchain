@@ -118,7 +118,7 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
 
 # run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions):
 if __name__ == '__main__':
-    run_sim_thread(3, 16, 80, 80, 3)
+    # run_sim_thread(3, 16, 80, 80, 3)
 
 
     # Process Method
