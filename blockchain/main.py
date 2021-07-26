@@ -89,7 +89,7 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
                         branch_size_writer = csv.writer(branch_size, delimiter='.', quotechar='"',
                                                         quoting=csv.QUOTE_MINIMAL)
                         branch_size_writer.writerow([cycles, node.cluster_id, node.node_id, node.blockchain.blocks.size,
-                                                     node.blockchain.blocks.left_size, node.blockchain.blocks.right_size])
+                                                     node.blockchain.blocks.left_size, node.blockchain.blocks.right_size, node.blockchain.blocks.height()])
                 for node in nodes_transacting:
                     transaction = SensorTransaction(node.wallet.public_key_string(), random.randint(0, 1000))
                     node.publish(transaction)
