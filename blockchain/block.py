@@ -7,8 +7,7 @@ from blockchain_utils import BlockchainUtils as BU
 # Should be changed to be more robust at a later time.
 class Block(dict):
     # def __init__(self, transactions, parent_hash, x, y, forger, block_count):
-    def __init__(self, transactions,node_id, x, y, forger, t=time.time(), parent_hash=None, signature=''):
-        # TODO: REMOVED node_id dimension, need to place it back
+    def __init__(self, transactions, node_id, x, y, forger, t=time.time(), parent_hash=None, signature=''):
         dict.__init__(self)
         # self.block_count = block
         self.coords = [node_id, x, y, t]
