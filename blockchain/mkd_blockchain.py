@@ -129,11 +129,11 @@ class MKDBlockchain:
         next_forger = self.pos.forger(parent_block_hash)
         return next_forger
 
-    def create_block(self, transactions_from_pool, forger_wallet, node_id):
+    def create_block(self, node_coords, transactions_from_pool, forger_wallet, node_id):
         # covered_transactions = self.get_covered_transaction_set(
         #     transactions_from_pool)
         #self.execute_transactions(transactions_from_pool)
-        new_block = forger_wallet.create_block(transactions_from_pool, node_id)
+        new_block = forger_wallet.create_block(transactions_from_pool, node_id, node_coords)
 
         # check if we need add here or in separate function
 

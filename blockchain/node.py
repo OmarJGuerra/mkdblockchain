@@ -224,7 +224,8 @@ class Node:
             print('i am not the forger')
 
     def mkd_forge(self):
-        block_data = self.blockchain.create_block(self.transaction_pool.transactions, self.wallet, self.node_id)
+        node_coords = self.coords
+        block_data = self.blockchain.create_block(node_coords, self.transaction_pool.transactions, self.wallet, self.node_id)
         self.transaction_pool.remove_from_pool(self.transaction_pool.transactions)
         block = block_data[0]
         block.parent_hash = BlockchainUtils.hash(block_data[1].to_json()).hexdigest()
