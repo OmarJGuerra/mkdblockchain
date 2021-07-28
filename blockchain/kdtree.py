@@ -265,7 +265,7 @@ class KDNode(Node):
                 return current
 
             # split on self.axis, recurse either left or right
-            if int(point[current.axis]) < int(current.data[current.axis]):
+            if point[current.axis] < current.data[current.axis]:
                 if current.left is None:
                     self.left_size += 1
                     current.size += 1
