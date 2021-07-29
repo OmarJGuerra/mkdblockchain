@@ -18,6 +18,8 @@ from collections import deque
 from functools import wraps
 import block  # removed from blockchain
 from blockchain_utils import BlockchainUtils as BU  # removed from blockchain
+import time
+import csv
 
 __author__ = u'Stefan Kögl <stefan@skoegl.net>'
 __version__ = '0.16'
@@ -255,6 +257,7 @@ class KDNode(Node):
         # print(f'current.left: {current.left} current.right: {current.right}')
 
         traversed_kdnodes = [current]
+        start_time = time.time()
 
         while True:
             check_dimensionality([point], dimensions=current.dimensions)
@@ -262,6 +265,11 @@ class KDNode(Node):
             if current.data is None:
                 current.data = point
                 current.size += 1
+                with open(f'time_to_add_block.csv', mode='a') as time_add:
+                    time_add_writer = csv.writer(time_add, delimiter='.', quotechar='"',
+                                                 quoting=csv.QUOTE_MINIMAL)
+                    time_taken = time.time() - start_time
+                    time_add_writer.writerow([self.size, self.left_size, self.right_size, time_taken])
                 return current
 
             # split on self.axis, recurse either left or right
@@ -273,6 +281,11 @@ class KDNode(Node):
                     current.left = current.create_subnode(point)
                     traversed_kdnodes.append(current.left)
                     # print(f'Traversed kd Nodes: {traversed_kdnodes}')
+                    with open(f'time_to_add_block.csv', mode='a') as time_add:
+                        time_add_writer = csv.writer(time_add, delimiter='.', quotechar='"',
+                                                     quoting=csv.QUOTE_MINIMAL)
+                        time_taken = time.time() - start_time
+                        time_add_writer.writerow([self.size, self.left_size, self.right_size, time_taken])
                     return current.left, parent, traversed_kdnodes
                 else:
                     current.size += 1
@@ -286,6 +299,11 @@ class KDNode(Node):
                     current.right = current.create_subnode(point)
                     traversed_kdnodes.append(current.right)
                     # print(f'Traversed kd Nodes: {traversed_kdnodes}')
+                    with open(f'time_to_add_block.csv', mode='a') as time_add:
+                        time_add_writer = csv.writer(time_add, delimiter='.', quotechar='"',
+                                                     quoting=csv.QUOTE_MINIMAL)
+                        time_taken = time.time() - start_time
+                        time_add_writer.writerow([self.size, self.left_size, self.right_size, time_taken])
                     return current.right, parent, traversed_kdnodes
                 else:
                     current.size += 1
