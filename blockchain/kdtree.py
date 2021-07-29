@@ -227,8 +227,8 @@ class KDNode(Node):
 
     def to_json(self):
         j_data = {'axis': self.axis,
-                'dimensions': self.dimensions, 'size': self.size,
-                'subtree_hash': self.subtree_hash}
+                  'dimensions': self.dimensions, 'size': self.size,
+                  'subtree_hash': self.subtree_hash}
 
         json_transactions = []
         for t in self.data.transactions:
@@ -310,7 +310,6 @@ class KDNode(Node):
                     current = current.right
                     traversed_kdnodes.append(current)
 
-
     # I don't think .size is working now
     def get_left_right_size(self):
         left_size = self.left.size if self.left is not None else 0
@@ -325,7 +324,7 @@ class KDNode(Node):
                               sel_axis=self.sel_axis,
                               dimensions=self.dimensions)
 
-    #def aggregate(self, other_tree):
+    # def aggregate(self, other_tree):
     @require_axis
     def merge(self, other_tree):
         if self.st_hash != other_tree.st_hash:
@@ -376,39 +375,39 @@ class KDNode(Node):
             return self
         else:
             if node.data.coords[self.axis] < self.data.coords[self.axis]:
-                #print(f'{node.data.coords[self.axis]} < {self.data.coords[self.axis]}')
+                # print(f'{node.data.coords[self.axis]} < {self.data.coords[self.axis]}')
                 if self.left is not None:
                     return self.left.search_node(node)
                 else:
-                    #print('failed search')
+                    # print('failed search')
                     return
             else:
-                #print(f'{node.data.coords[self.axis]} >= {self.data.coords[self.axis]}')
+                # print(f'{node.data.coords[self.axis]} >= {self.data.coords[self.axis]}')
                 if self.right is not None:
                     return self.right.search_node(node)
                 else:
-                    #print('failed search')
+                    # print('failed search')
                     return
 
     @require_axis
     def search_by_coords(self, coordinates):
-        #print(f'coords: {coordinates}, self: {self.data}')
+        # print(f'coords: {coordinates}, self: {self.data}')
         if set(coordinates) == set(self.data):
             return self
         else:
             if coordinates[self.axis] < self.data[self.axis]:
-                #print(f'{coordinates[self.axis]} < {self.data[self.axis]}')
+                # print(f'{coordinates[self.axis]} < {self.data[self.axis]}')
                 if self.left is not None:
                     return self.left.search_by_coords(coordinates)
                 else:
-                    #print('failed search')
+                    # print('failed search')
                     return
             else:
-                #print(f'{coordinates[self.axis]} >= {self.data[self.axis]}')
+                # print(f'{coordinates[self.axis]} >= {self.data[self.axis]}')
                 if self.right is not None:
                     return self.right.search_by_coords(coordinates)
                 else:
-                    #print('failed search')
+                    # print('failed search')
                     return
 
 
