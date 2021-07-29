@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/mkdblockchain.iml" filepath="$PROJECT_DIR$/.idea/mkdblockchain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../py-dag/.idea/py-dag.iml" filepath="$PROJECT_DIR$/../py-dag/.idea/py-dag.iml" />
     </modules>
   </component>
 </project>

@@ -15,6 +15,7 @@ class Block(dict):
         self.parent_hash = parent_hash
         self.forger = forger
         self.signature = signature
+        self.node_id = node_id
 
     def __getitem__(self, item):
         return self.coords[item]
