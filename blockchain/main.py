@@ -15,8 +15,6 @@ MAX_NODES = 9999
 
 
 def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions):
-    cluster_block_forging = open(f'cluster_block_forging_{test_num}.csv', mode='w')
-    cluster_forging_writer = csv.writer(cluster_block_forging, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
     # Initialize Nodes with Genesis Block
     print(f'START TEST {test_num}')
@@ -108,14 +106,16 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
                                 forge_begin = time.time()
                                 node.mkd_forge()
                                 forge_end = time.time() - forge_begin
-                                cluster_forging_writer.writerow([node.cluster_id, node.node_id,
-                                                                 node.blockchain.blocks.size,
-                                                                 node.blockchain.blocks.left_size,
-                                                                 node.blockchain.blocks.right_size, forge_end])
+                                with open(f'cluster_block_forging_{test_num}.csv', mode='a') as cluster_block_forging:
+                                    cluster_forging_writer = csv.writer(cluster_block_forging, delimiter=',',
+                                                                        quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                                    cluster_forging_writer.writerow([node.cluster_id, node.node_id,
+                                                                     node.blockchain.blocks.size,
+                                                                     node.blockchain.blocks.left_size,
+                                                                     node.blockchain.blocks.right_size, forge_end])
             i += 1
 
     # now = time.time() - then
-    cluster_block_forging.close()
     # print(f'Complete movement simulation @ {num_nodes} nodes: {now}')
 
 
