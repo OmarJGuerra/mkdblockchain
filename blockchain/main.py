@@ -129,7 +129,7 @@ if __name__ == '__main__':
     test_2 = multiprocessing.Process(target=run_sim_thread, args=(1, 16, 80, 10, 4))
     test_3 = multiprocessing.Process(target=run_sim_thread, args=(2, 16, 80, 10, 4))
     test_4 = multiprocessing.Process(target=run_sim_thread, args=(3, 16, 80, 10, 4))
-    test_5 = multiprocessing.Process(target=run_sim_thread, args=(4 16, 80, 10, 4))
+    test_5 = multiprocessing.Process(target=run_sim_thread, args=(4, 16, 80, 10, 4))
     test_6 = multiprocessing.Process(target=run_sim_thread, args=(5, 16, 80, 10, 4))
     test_7 = multiprocessing.Process(target=run_sim_thread, args=(6, 16, 80, 10, 4))
     test_8 = multiprocessing.Process(target=run_sim_thread, args=(7, 16, 80, 10, 4))
