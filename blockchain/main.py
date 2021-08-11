@@ -54,7 +54,7 @@ def run_sim_thread(test_num, num_clusters, num_nodes, forge_interval, dimensions
     # Opens the data set file and generates nodes based on the provided data.
     # file is comma delimited in the following format: time-nodeID-x_coord-y_coord-miner-region-prev_region
     # then = time.time()
-    with open(f'blockchain/node_data_{test_num}.txt') as f:  # added blockchain to file path
+    with open(f'blockchain/time-nodeID-xcoor-ycoor-miner-region-previousRegion_{test_num}.txt') as f:  # added blockchain to file path
         lines = f.readlines()  # list containing lines of file
         i = 0
         cycles = 0
@@ -125,39 +125,41 @@ if __name__ == '__main__':
 
 
     # Process Method
-    test_1 = multiprocessing.Process(target=run_sim_thread, args=(1, 16, 80, 10, 4))
-    test_2 = multiprocessing.Process(target=run_sim_thread, args=(2, 16, 80, 20, 4))
-    # test_3 = multiprocessing.Process(target=run_sim_thread, args=(3, 16, 80, 30, 4))
-    test_4 = multiprocessing.Process(target=run_sim_thread, args=(4, 16, 80, 40, 4))
-    # test_5 = multiprocessing.Process(target=run_sim_thread, args=(5, 16, 80, 50, 4))
-    # test_6 = multiprocessing.Process(target=run_sim_thread, args=(6, 16, 80, 60, 4))
-    # test_7 = multiprocessing.Process(target=run_sim_thread, args=(7, 16, 80, 70, 4))
-    test_8 = multiprocessing.Process(target=run_sim_thread, args=(8, 16, 80, 80, 4))
-    # test_9 = multiprocessing.Process(target=run_sim_thread, args=(9, 16, 80, 90, 4))
-    # test_10 = multiprocessing.Process(target=run_sim_thread, args=(10, 16, 80, 100, 4))
+    test_1 = multiprocessing.Process(target=run_sim_thread, args=('00', 16, 80, 10, 4))
+    test_2 = multiprocessing.Process(target=run_sim_thread, args=('01', 16, 80, 10, 4))
+    test_3 = multiprocessing.Process(target=run_sim_thread, args=('02', 16, 80, 10, 4))
+    test_4 = multiprocessing.Process(target=run_sim_thread, args=('03', 16, 80, 10, 4))
+    test_5 = multiprocessing.Process(target=run_sim_thread, args=('04', 16, 80, 10, 4))
+    test_6 = multiprocessing.Process(target=run_sim_thread, args=('05', 16, 80, 10, 4))
+    test_7 = multiprocessing.Process(target=run_sim_thread, args=('06', 16, 80, 10, 4))
+    test_8 = multiprocessing.Process(target=run_sim_thread, args=('07', 16, 80, 10, 4))
+    test_9 = multiprocessing.Process(target=run_sim_thread, args=('08', 16, 80, 10, 4))
+    test_10 = multiprocessing.Process(target=run_sim_thread, args=('09', 16, 80, 10, 4))
+    test_11 = multiprocessing.Process(target=run_sim_thread, args=('10', 16, 80, 10, 4))
 
     test_1.start()
     test_2.start()
-    # test_3.start()
+    test_3.start()
     test_4.start()
-    # test_5.start()
-    # test_6.start()
-    # test_7.start()
+    test_5.start()
+    test_6.start()
+    test_7.start()
     test_8.start()
-    # test_9.start()
-    # test_10.start()
+    test_9.start()
+    test_10.start()
+    test_11.start()
 
     test_1.join()
     test_2.join()
-    # test_3.join()
+    test_3.join()
     test_4.join()
-    # test_5.join()
-    # test_6.join()
-    # test_7.join()
+    test_5.join()
+    test_6.join()
+    test_7.join()
     test_8.join()
-    # test_9.join()
-    # test_10.join()
-
+    test_9.join()
+    test_10.join()
+    test_11.join()
 
     # # Regular Threading Method
     # test_1 = threading.Thread(target=run_sim_thread, args=(1, 16, 80, 20, 4))
