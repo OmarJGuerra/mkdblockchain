@@ -10,8 +10,8 @@ from itertools import islice
 # import after starting coverage, to ensure that import-time code is covered
 import kdtree
 
-class RemoveTest(unittest.TestCase):
 
+class RemoveTest(unittest.TestCase):
 
     def test_remove_duplicates(self):
         """ creates a tree with only duplicate points, and removes them all """
@@ -34,13 +34,11 @@ class RemoveTest(unittest.TestCase):
             nodes_in_tree = len(list(tree.inorder()))
             self.assertEqual(nodes_in_tree, remaining_points)
 
-
     def test_remove(self, num=100):
         """ Tests random removal from a tree, multiple times """
 
         for i in range(num):
             self.do_random_remove()
-
 
     def do_random_remove(self):
         """ Creates a random tree, removes all points in random order """
@@ -80,7 +78,6 @@ class AddTest(unittest.TestCase):
         for i in range(num):
             self.do_random_add()
 
-
     def do_random_add(self, num_points=100):
 
         points = list(set(islice(random_points(), 0, num_points)))
@@ -99,7 +96,6 @@ class AddTest(unittest.TestCase):
 
 class InvalidTreeTests(unittest.TestCase):
 
-
     def test_invalid_child(self):
         """ Children on wrong subtree invalidate Tree """
         child = kdtree.KDNode((3, 2))
@@ -111,7 +107,6 @@ class InvalidTreeTests(unittest.TestCase):
         tree = kdtree.create([(4, 1)])
         tree.right=child
         self.assertFalse(tree.is_valid())
-
 
     def test_different_dimensions(self):
         """ Can't create Tree for Points of different dimensions """
@@ -132,9 +127,7 @@ class TreeTraversals(unittest.TestCase):
         self.assertEqual(preorder_len, postorder_len)
 
 
-
 class BalanceTests(unittest.TestCase):
-
 
     def test_rebalance(self):
 
@@ -144,7 +137,6 @@ class BalanceTests(unittest.TestCase):
 
         tree = tree.rebalance()
         self.assertTrue(tree.is_balanced)
-
 
 
 class NearestNeighbor(unittest.TestCase):
@@ -182,7 +174,6 @@ class NearestNeighbor(unittest.TestCase):
         best, best_dist = self.find_best(tree, point)
         self.assertEqual(best_dist, dist, msg=', '.join(repr(p) for p in points) + ' / ' + repr(point))
 
-
     def test_search_nn2(self):
         points = [(1,2,3),(5,1,2),(9,3,4),(3,9,1),(4,8,3),(9,1,1),(5,0,0),
                   (1,1,1),(7,2,2),(5,9,1),(1,1,9),(9,8,7),(2,3,4),(4,5,4.01)]
@@ -192,7 +183,6 @@ class NearestNeighbor(unittest.TestCase):
         nn, dist = tree.search_nn(point)
         best, best_dist = self.find_best(tree, point)
         self.assertEqual(best_dist, dist)
-
 
     def test_search_nn3(self):
         points = [(0, 25, 73), (1, 91, 85), (1, 47, 12), (2, 90, 20),
@@ -223,8 +213,6 @@ class NearestNeighbor(unittest.TestCase):
         nn, dist = tree.search_nn(point)
         best, best_dist = self.find_best(tree, point)
         self.assertEqual(best_dist, dist)
-
-
 
     def find_best(self, tree, point):
         best = None
@@ -356,8 +344,10 @@ def random_tree(nodes=20, dimensions=3, minval=0, maxval=100):
     tree = kdtree.create(points)
     return tree
 
+
 def random_point(dimensions=3, minval=0, maxval=100):
     return tuple(random.randint(minval, maxval) for _ in range(dimensions))
+
 
 def random_points(dimensions=3, minval=0, maxval=100):
     while True:

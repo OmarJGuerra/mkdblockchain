@@ -10,6 +10,7 @@ https://en.wikipedia.org/wiki/K-d_tree
 
 from __future__ import print_function
 
+import copy
 import heapq
 import itertools
 import operator
@@ -39,8 +40,8 @@ class Node(dict, object):
         self.left = left
         self.right = right
 
-    def __repr__(self):
-        return f'Node({self.data}, {self.left}, {self.right})'
+    # def __repr__(self):
+    #     return f'Node({self.data}, {self.left}, {self.right})'
 
     @property
     def is_leaf(self):
@@ -199,7 +200,7 @@ class KDNode(Node):
     """A Node that contains kd-tree specific data and methods."""
 
     def __init__(self, data=None, left=None, right=None, axis=None,
-                 sel_axis=None, dimensions=None, size=0, right_size=0, left_size=0, st_hash=None):
+                 sel_axis=None, dimensions=None, size=0, right_size=0, left_size=0):
         """
         Creates a new node for a kd-tree.
 
@@ -217,13 +218,7 @@ class KDNode(Node):
         self.size = size
         self.right_size = right_size
         self.left_size = left_size
-        self.st_hash = st_hash
-        if left is None and right is None:
-            self.subtree_hash = BU.hash(self.data).hexdigest()
-        else:
-            self.subtree_hash = BU.hash(left).hexdigest() if right is None \
-                else BU.hash(right).hexdigest() if left is None \
-                else BU.hash(BU.hash(left).hexdigest() + BU.hash(right)).hexdigest()
+        self.subtree_hash = BU.hash(self.data).hexdigest()
 
     def to_json(self):
         j_data = {'axis': self.axis,
@@ -243,7 +238,27 @@ class KDNode(Node):
         return i
 
     def __repr__(self):
-        return f'KDNode({self.data}, {self.axis}, {self.dimensions}, {self.st_hash}'
+        return f'KDNode({self.data}, {self.axis}, {self.dimensions}, {self.subtree_hash}'
+
+    @require_axis
+    def update_subtree_hash(self, point):
+        hashh = point.subtree_hash
+        nodeList = self.search_node_parent(point)
+        while nodeList:
+            if nodeList[1] is None:
+                if nodeList[2]:
+                    nodeList[0].subtree_hash = copy.deepcopy(concat_hashes("None", hashh, nodeList[0].subtree_hash))
+                else:
+                    nodeList[0].subtree_hash = copy.deepcopy(concat_hashes(hashh, "None", nodeList[0].subtree_hash))
+            else:
+                if nodeList[2]:
+                    nodeList[0].subtree_hash = copy.deepcopy(
+                        concat_hashes(nodeList[1].subtree_hash, hashh, nodeList[0].subtree_hash))
+                else:
+                    nodeList[0].subtree_hash = copy.deepcopy(
+                        concat_hashes(hashh, nodeList[1].subtree_hash, nodeList[0].subtree_hash))
+            hashh = nodeList[0].subtree_hash
+            nodeList = self.search_node_parent(nodeList[0])
 
     @require_axis
     def add(self, point):  # point refers to a block for our purposes
@@ -256,7 +271,6 @@ class KDNode(Node):
         current = self
         # print(f'current.left: {current.left} current.right: {current.right}')
 
-        traversed_kdnodes = [current]
         start_time = time.time()
 
         while True:
@@ -265,10 +279,12 @@ class KDNode(Node):
             if current.data is None:
                 current.data = point
                 current.size += 1
+
+                time_taken = time.time() - start_time
+
                 with open(f'time_to_add_block.csv', mode='a') as time_add:
                     time_add_writer = csv.writer(time_add, delimiter='.', quotechar='"',
                                                  quoting=csv.QUOTE_MINIMAL)
-                    time_taken = time.time() - start_time
                     time_add_writer.writerow([self.size, self.left_size, self.right_size, time_taken])
                 return current
 
@@ -279,36 +295,32 @@ class KDNode(Node):
                     current.size += 1
                     parent = current.data
                     current.left = current.create_subnode(point)
-                    traversed_kdnodes.append(current.left)
-                    # print(f'Traversed kd Nodes: {traversed_kdnodes}')
                     with open(f'time_to_add_block.csv', mode='a') as time_add:
                         time_add_writer = csv.writer(time_add, delimiter='.', quotechar='"',
                                                      quoting=csv.QUOTE_MINIMAL)
                         time_taken = time.time() - start_time
                         time_add_writer.writerow([self.size, self.left_size, self.right_size, time_taken])
-                    return current.left, parent, traversed_kdnodes
+                    self.update_subtree_hash(current.left)
+                    return current.left, parent
                 else:
                     current.size += 1
                     current = current.left
-                    traversed_kdnodes.append(current)
             else:
                 if current.right is None:
                     self.right_size += 1
                     current.size += 1
                     parent = current.data
                     current.right = current.create_subnode(point)
-                    traversed_kdnodes.append(current.right)
-                    # print(f'Traversed kd Nodes: {traversed_kdnodes}')
                     with open(f'time_to_add_block.csv', mode='a') as time_add:
                         time_add_writer = csv.writer(time_add, delimiter='.', quotechar='"',
                                                      quoting=csv.QUOTE_MINIMAL)
                         time_taken = time.time() - start_time
                         time_add_writer.writerow([self.size, self.left_size, self.right_size, time_taken])
-                    return current.right, parent, traversed_kdnodes
+                        self.update_subtree_hash(current.right)
+                    return current.right, parent
                 else:
                     current.size += 1
                     current = current.right
-                    traversed_kdnodes.append(current)
 
     # I don't think .size is working now
     def get_left_right_size(self):
@@ -324,19 +336,21 @@ class KDNode(Node):
                               sel_axis=self.sel_axis,
                               dimensions=self.dimensions)
 
-    # def aggregate(self, other_tree):
-    @require_axis
-    def merge(self, other_tree):
-        if self.st_hash != other_tree.st_hash:
-            merging_tree = other_tree if other_tree.size < self.size else self
-            merged_into_tree = other_tree if other_tree.size >= self.size else self
 
-            for kdn in merging_tree.level_order():
-                merged_into_tree.add_node(kdn)
+    # # def aggregate(self, other_tree):
+    # @require_axis
+    # def merge(self, other_tree):
+    #     if self.subtree_hash != other_tree.subtree_hash:
+    #         merging_tree = other_tree if other_tree.size < self.size else self
+    #         merged_into_tree = other_tree if other_tree.size >= self.size else self
+    #
+    #         for kdn in merging_tree.level_order():
+    #             merged_into_tree.add_node(kdn)
+    #
+    #         return merged_into_tree
+    #     else:
+    #         return self
 
-            return merged_into_tree
-        else:
-            return self
 
     @require_axis
     def add_node(self, node):
@@ -345,9 +359,9 @@ class KDNode(Node):
             if node.data[self.axis] < self.data[self.axis]:
                 if not self.left:
                     self.left = node
-                    self.left.st_hash = BU.hash(self.left.data).hexdigest()
-                    right_hash = self.right.st_hash if self.right is not None else ''
-                    self.st_hash = concat_hashes(self.left.st_hash, right_hash)
+                    self.left.subtree_hash = BU.hash(self.left.data).hexdigest()
+                    right_hash = self.right.subtree_hash if self.right is not None else ''
+                    self.subtree_hash = concat_hashes(self.left.subtree_hash, right_hash)
                     self.left.data.parent_hash = BU.hash(self.data.to_json).hexdigest()
                     return self.left
                 else:
@@ -355,15 +369,16 @@ class KDNode(Node):
             else:
                 if not self.right:
                     self.right = node
-                    self.right.st_hash = BU.hash(self.right.data.to_json).hexdigest()
-                    left_hash = self.left.st_hash if self.left is not None else ''
-                    self.st_hash = concat_hashes(left_hash, self.right.st_hash)
+                    self.right.subtree_hash = BU.hash(self.right.data.to_json).hexdigest()
+                    left_hash = self.left.subtree_hash if self.left is not None else ''
+                    self.subtree_hash = concat_hashes(left_hash, self.right.subtree_hash)
                     self.right.data.parent_hash = BU.hash(self.data.to_json).hexdigest()
                     return self.right
                 else:
                     return self.right.add_node(node)
         else:
             print("Node already in tree")
+
 
     @require_axis
     def node_in_tree(self, node):
@@ -388,6 +403,60 @@ class KDNode(Node):
                 else:
                     # print('failed search')
                     return
+
+    @require_axis
+    def search_node_parent(self, node):
+        temp = []
+        if node.data == self.data:
+            return temp
+        else:
+            if node.data[self.axis] < self.data[self.axis]:
+                # print(f'{node.data.coords[self.axis]} < {self.data.coords[self.axis]}')
+                if self.left is not None:
+                    if self.left.data == node.data:
+                        temp.append(self)
+                        temp.append(self.right)
+                        temp.append(0)
+                        return temp
+                    return self.left.search_node_parent(node)
+                else:
+                    # print('failed search')
+                    return temp
+            else:
+                # print(f'{node.data.coords[self.axis]} >= {self.data.coords[self.axis]}')
+                if self.right is not None:
+                    if self.right.data == node.data:
+                        temp.append(self)
+                        temp.append(self.left)
+                        temp.append(1)
+                        return temp
+                    return self.right.search_node_parent(node)
+                else:
+                    # print('failed search')
+                    return temp
+
+    def search_parent(self, node):
+        if node.data.coords == self.data.coords:
+            return 0
+        else:
+            if node.data.coords[self.axis] < self.data.coords[self.axis]:
+                # print(f'{node.data.coords[self.axis]} < {self.data.coords[self.axis]}')
+                if self.left is not None:
+                    if self.left.data.coords == node.data.coords:
+                        return self
+                    return self.left.search_parent(node)
+                else:
+                    # print('failed search')
+                    return 0
+            else:
+                # print(f'{node.data.coords[self.axis]} >= {self.data.coords[self.axis]}')
+                if self.right is not None:
+                    if self.right.data.coords == node.data.coords:
+                        return self
+                    return self.right.search_parent(node)
+                else:
+                    # print('failed search')
+                    return 0
 
     @require_axis
     def search_by_coords(self, coordinates):
@@ -578,6 +647,7 @@ class KDNode(Node):
         if not self:
             return
 
+
         node_dist = get_dist(self)
 
         # Add current node to the priority queue if it closer than
@@ -714,74 +784,161 @@ class KDNode(Node):
         return sel_func(candidates, key=max_key)
 
 
-def verify_mkd_blockchain(root):
-    st = root.subtree_hash
-    if root.left is None and root.right is None:
-        if root.subtree_hash == '0':
-            return True
-        new_hash = BU.hash(root.data).hexdigest()
-        return new_hash == st
-    elif root.left is None:
-        if verify_mkd_blockchain(root.right):
-            return st == root.right.subtree_hash
+def mergerr(root1, root2):
+    nodee = root2.search_node(root1)
+    if nodee:
+        if nodee.subtree_hash == root1.subtree_hash:
+             return
+        if root1.left:
+            mergerr(root1.left, root2)
+        if root1.right:
+            mergerr(root1.right, root2)
+        return
+    if root1.left:
+        mergerr(root1.left, root2)
+    if root1.right:
+        mergerr(root1.right, root2)
+    root1.publish(root2.data)
+    return
+
+
+def identical_subtrees_and(root1, root2):
+    cw = csv.writer(open("duplicates.csv", 'a'))
+    temp1 = ["B1 Size", "B2 Size", "B1,B2 Total", "No. Identical Subtrees", "Blocks in Id Trees", "total Id Blocks", "Identical / B1.size", "Identical / B2.size", "Ratio Id Blocks/ Id tree Blocks"]
+    cw.writerow(list(temp1))
+    temp1.clear()
+    temp = list(compinfos(root1, root2))
+    temp[1] = count_size(root2)
+    temp2 = [temp[0], temp[1], (temp[0] + temp[1] - temp[4]), temp[2], temp[3], temp[4], float(temp[4]/ (temp[0])), float(temp[4]/ (temp[1])), float(temp[4] / (temp[3]))]
+    cw.writerow(list(temp2))
+
+
+def count_size(root):
+    i = 1
+    if root.left is not None:
+        i = i + count_size(root.left)
+    if root.right is not None:
+        i = i + count_size(root.right)
+    return i
+
+
+def compinfos(root1, root2):
+    """iterator for nodes: left, right, root"""
+    # "B1 Size", "B2 Size", "No. Identical Subtrees", "Blocks in Id Trees", "total Id Blocks"
+    infos = [0, 0, 0, 0, 0]
+    if not root1:
+        return infos
+    else:
+        infos[0] = 1
+    nodee = root2.search_node(root1)
+    if nodee:
+        if nodee.subtree_hash == root1.subtree_hash:
+            infos[0] = count_size(root1)
+            infos[2] = 1
+            infos[3] = infos[0]
+            infos[4] = infos[0]
+            return infos
         else:
-            return False
+            infos[4] = 1
+    if root1.left:
+        temp = compinfos(root1.left, root2)
+        infos[0] += temp[0]
+        infos[2] += temp[2]
+        infos[3] += temp[3]
+        infos[4] += temp[4]
+    if root1.right:
+        temp = compinfos(root1.right, root2)
+        infos[0] += temp[0]
+        infos[2] += temp[2]
+        infos[3] += temp[3]
+        infos[4] += temp[4]
+    return infos
+
+
+def collect_hash(root):
+    hashset = set()
+    temp = []
+    duplicates = set()
+    temp.append(hashset)
+    temp.append(duplicates)
+    if ((root.left is None) & (root.right is None)):
+        hashset.add(root.subtree_hash)
+        temp[0] = hashset
+        temp[1] = duplicates
+        return temp
     elif root.right is None:
-        if verify_mkd_blockchain(root.left):
-            return st == root.left.subtree_hash
+        temp = collect_hash(root.left)
+        if root.subtree_hash in temp[0]:
+            duplicates.add(root.subtree_hash)
+            temp[1] = temp[1].union(duplicates)
+            return temp
         else:
-            return False
+            hashset.add(root.subtree_hash)
+            temp[0] = temp[0].union(hashset)
+            return temp
+    elif root.left is None:
+        temp = collect_hash(root.right)
+        if root.subtree_hash in temp[0]:
+            duplicates.add(root.subtree_hash)
+            temp[1] = temp[1].union(duplicates)
+            return temp
+        else:
+            hashset.add(root.subtree_hash)
+            temp[0] = temp[0].union(hashset)
+            return temp
     else:
-        if verify_mkd_blockchain(root.left) and verify_mkd_blockchain(root.right):
-            new_hash = concat_hashes(root.left.subtree_hash, root.right.subtree_hash)
-            return new_hash == root.subtree_hash
-
-
-# Want to change to create_subtree_hash or create_st_hash
-def create_subtree_hash(traversed_kdnodes):
-    for kdnode in reversed(traversed_kdnodes):
-        if kdnode.left is not None and kdnode.right is not None:
-            #print(f'Left: {kdnode.left.subtree_hash} Right: {kdnode.right.subtree_hash}')
-            kdnode.subtree_hash = concat_hashes(kdnode.left.subtree_hash, kdnode.right.subtree_hash)
-        elif kdnode.left is not None and kdnode.right is None:
-            #print(f'Left: {kdnode.left.subtree_hash}')
-            kdnode.subtree_hash = kdnode.left.subtree_hash
-        elif kdnode.right is not None and kdnode.left is None:
-            #print(f'Right: {kdnode.right.subtree_hash}')
-            kdnode.subtree_hash = kdnode.right.subtree_hash
+        temp = collect_hash(root.right)
+        hashset = hashset.union(temp[0])
+        duplicates = duplicates.union(temp[1])
+        temp.clear()
+        temp = collect_hash(root.left)
+        duplicates = duplicates.union(hashset & temp[0])
+        duplicates = duplicates.union(temp[1])
+        hashset = hashset.union(temp[0])
+        if root.subtree_hash in hashset:
+            duplicates.add(root.subtree_hash)
+            temp.clear()
+            temp.append(hashset)
+            temp.append(duplicates)
+            return temp
         else:
-            kdnode.subtree_hash = BU.hash(kdnode.data.to_json()).hexdigest()
+            hashset.add(root.subtree_hash)
+            temp.clear()
+            temp.append(hashset)
+            temp.append(duplicates)
+            return temp
+
+# # !!
+# # TODO: Check
+# def verify_subtree_hash(root, kdnode):
+#     if kdnode != root:
+#         if concat_hashes(root.left.subtree_hash, root.right.subtree_hash) == root.subtree_hash:
+#             if kdnode.data[root.axis] < root.data[root.axis]:
+#                 if kdnode == root.left:
+#                     if concat_hashes(root.left.left.subtree_hash, root.left.right.subtree_hash) == kdnode.subtree_hash:
+#                         return print('Valid')
+#                     else:
+#                         return print('Invalid')
+#                 else:
+#                     return verify_subtree_hash(root.left, kdnode)
+#             else:
+#                 if kdnode == root.right:
+#                     if concat_hashes(root.right.left.subtree_hash, root.right.right.subtree_hash) == kdnode.subtree_hash:
+#                         return print('Valid')
+#                     else:
+#                         return print('Invalid')
+#                 else:
+#                     return verify_subtree_hash(root.right, kdnode)
+#         else:
+#             print('Invalid')
+#     elif kdnode.subtree_hash == root.subtree_hash:
+#         print('Valid')
+#     else:
+#         print('Invalid')
 
 
-def verify_subtree_hash(root, kdnode):
-    if kdnode != root:
-        if concat_hashes(root.left.subtree_hash, root.right.subtree_hash) == root.subtree_hash:
-            if kdnode.data[root.axis] < root.data[root.axis]:
-                if kdnode == root.left:
-                    if concat_hashes(root.left.left.subtree_hash, root.left.right.subtree_hash) == kdnode.subtree_hash:
-                        return print('Valid')
-                    else:
-                        return print('Invalid')
-                else:
-                    return verify_subtree_hash(root.left, kdnode)
-            else:
-                if kdnode == root.right:
-                    if concat_hashes(root.right.left.subtree_hash, root.right.right.subtree_hash) == kdnode.subtree_hash:
-                        return print('Valid')
-                    else:
-                        return print('Invalid')
-                else:
-                    return verify_subtree_hash(root.right, kdnode)
-        else:
-            print('Invalid')
-    elif kdnode.subtree_hash == root.subtree_hash:
-        print('Valid')
-    else:
-        print('Invalid')
-
-
-def concat_hashes(hash1, hash2):
-    return BU.hash(hash1 + hash2).hexdigest()
+def concat_hashes(hash1, hash2, parentHash):
+    return BU.hash(hash1 + hash2 + parentHash).hexdigest()
 
 
 def concat_hash_list(hashes):
@@ -842,13 +999,13 @@ def create(point_list=None, dimensions=None, axis=0, sel_axis=None):
             else BU.hash(right.data) if left is None \
             else BU.hash(BU.hash(left.data) + BU.hash(right.data))
 
-    return KDNode(loc, left, right, axis=axis, sel_axis=sel_axis, dimensions=dimensions, st_hash=hashed)
+    return KDNode(loc, left, right, axis=axis, sel_axis=sel_axis, dimensions=dimensions)
 
 
 def create_root(dimensions, genesis_node_id, forger, sel_axis=None):
     sel_axis = sel_axis or (lambda prev_axis: (prev_axis + 1) % dimensions)
     g_block = block.Block.genesis(genesis_node_id, forger)
-    return KDNode(g_block, left=None, right=None, axis=0, sel_axis=sel_axis, size=1, st_hash='0')
+    return KDNode(g_block, left=None, right=None, axis=0, sel_axis=sel_axis, size=1)
 
 
 def check_dimensionality(point_list, dimensions=None):
@@ -879,6 +1036,30 @@ def level_order(tree, include_all=False):
 
         if include_all or node.right:
             q.append(node.right or node.__class__())
+
+
+def bfprint(root):
+    temp = []
+    temp2 = []
+    temp.append(root)
+
+    while temp:
+        for x in temp:
+            if x != "|":
+                print("| ", end='')
+                print(x.subtree_hash, end='')
+                print("  /  ", end='')
+                print(x.data, end='')
+                print(" |", end='')
+                if x.left:
+                    temp2.append(x.left)
+                if x.right:
+                    temp2.append(x.right)
+        print("\n")
+        temp.clear()
+        temp = copy.deepcopy(temp2)
+        temp2.clear()
+        temp2 = []
 
 
 def visualize(tree, max_level=100, node_width=10, left_padding=5):
@@ -915,3 +1096,4 @@ def visualize(tree, max_level=100, node_width=10, left_padding=5):
 
     print()
     print()
+

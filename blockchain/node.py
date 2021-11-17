@@ -13,10 +13,6 @@ import csv
 import time
 
 
-# from socket_communication import SocketCommunication
-# from node_api import NodeAPI
-
-
 class Node:
 
     def __init__(self, test_num, node_id, cluster_id, blockchain=None, key=None):
@@ -79,26 +75,30 @@ class Node:
         if not transaction_exists and not transaction_in_block and signature_valid:
             self.transaction_pool.add_transaction(sensor_transaction)
 
-    def handle_transaction(self, transaction):
-        data = transaction.payload()
-        signature = transaction.signature
-        signer_public_key = transaction.sender_public_key
-        signature_valid = Wallet.signature_valid(
-            data, signature, signer_public_key)
-        transaction_exists = self.transaction_pool.transaction_exists(transaction)
-        transaction_in_block = self.blockchain.transaction_exists(transaction)
-        if not transaction_exists and not transaction_in_block and signature_valid:
-            self.transaction_pool.add_transaction(transaction)
-            message = Message(self.p2p.socketConnector,
-                              'TRANSACTION', transaction)
-            encoded_message = BlockchainUtils.encode(message)
-            self.p2p.broadcast(encoded_message)
-            forging_required = self.transaction_pool.forging_required()
-            if forging_required:
-                self.forge()
+    # def handle_transaction(self, transaction):
+    #     data = transaction.payload()
+    #     signature = transaction.signature
+    #     signer_public_key = transaction.sender_public_key
+    #     signature_valid = Wallet.signature_valid(
+    #         data, signature, signer_public_key)
+    #     transaction_exists = self.transaction_pool.transaction_exists(transaction)
+    #     transaction_in_block = self.blockchain.transaction_exists(transaction)
+    #     if not transaction_exists and not transaction_in_block and signature_valid:
+    #         self.transaction_pool.add_transaction(transaction)
+    #         message = Message(self.p2p.socketConnector,
+    #                           'TRANSACTION', transaction)
+    #         encoded_message = BlockchainUtils.encode(message)
+    #         self.p2p.broadcast(encoded_message)
+    #         forging_required = self.transaction_pool.forging_required()
+    #         if forging_required:
+    #             self.forge()
 
     def handle_block(self, block):
         self.blockchain.blocks.add(block)
+        print('~~~~~~~~~~~~~~\n'
+              '~~~ HANDLE ~~~\n'
+              '~~~~~~~~~~~~~~')
+        kdtree.bfprint(self.blockchain.blocks)
         self.blockchain_size += 1
         self.transaction_pool.remove_from_pool(block.transactions)
         # for transaction in block.transactions:
@@ -112,7 +112,7 @@ class Node:
         # parent_block_hash_valid = self.blockchain.parent_block_hash_valid(block)
         # forger_valid = self.blockchain.forger_valid(block)
         # transactions_valid = self.blockchain.transactions_valid(
-            # block.transactions)
+        #    block.transactions)
         # signature_valid = Wallet.signature_valid(block_hash, signature, forger)
         # if not block_count_valid:
         #     self.blockchain.request_chain()
@@ -122,10 +122,10 @@ class Node:
         #     message = Message(self.p2p.socketConnector, 'BLOCK', block)
         #     self.p2p.broadcast(BlockchainUtils.encode(message))
 
-    def handle_blockchain_request(self, requesting_node):
-        message = Message(self.p2p.socketConnector,
-                          'BLOCKCHAIN', self.blockchain)
-        self.p2p.send(requesting_node, BlockchainUtils.encode(message))
+    # def handle_blockchain_request(self, requesting_node):
+    #     message = Message(self.p2p.socketConnector,
+    #                       'BLOCKCHAIN', self.blockchain)
+    #     self.p2p.send(requesting_node, BlockchainUtils.encode(message))
 
     # TODO: Need to add functionality for when blockchain is broadcast after merge and confirm function of deepcopy
     def handle_blockchain(self, blockchain):
@@ -164,10 +164,22 @@ class Node:
         merged_into_tree = first_tree  # if first_tree.size > second_tree.size else second_tree
         merging_tree = second_tree  # first_tree if merged_into_tree != first_tree else second_tree
 
+        print('~~~~~~~~~~~~~~\n'
+              '~~~ TREE 1 ~~~\n'
+              '~~~~~~~~~~~~~~')
+        #bfprint(merged_into_tree)
+
+        print('~~~~~~~~~~~~~~\n'
+              '~~~ TREE 2 ~~~\n'
+              '~~~~~~~~~~~~~~')
+        #kdtree.bfprint(merging_tree)
+
+        kdtree.identical_subtrees_and(merged_into_tree, merging_tree)
+
         merged_into_tree_size = merged_into_tree.size
         merging_tree_size = merging_tree.size
 
-        validation_time = open(f'validation_time_{self.test_num}.csv', mode='a')
+        validation_time = open(f'data/validation_time_{self.test_num}.csv', mode='a')
         validation_time_writer = csv.writer(validation_time, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
         nodes_published = 0
@@ -186,6 +198,7 @@ class Node:
                     # print(f'merge block published: {kd_node.data}')
                     nodes_published += 1
             else:
+                kdtree.identical_subtrees_and(merged_into_tree, merging_tree)
                 nodes_not_published += 1
         after_merge = time.time() - before_merge
         validation_time_writer.writerow([self.cluster_id, self.node_id,
@@ -210,35 +223,19 @@ class Node:
         # children iterator to verify parent hash
         # postorder if not verified to prune children
 
-    def forge(self):
-        forger = self.blockchain.next_forger()
-        if forger == self.wallet.public_key_string():
-            print('i am the forger')
-            block = self.blockchain.create_block(
-                self.transaction_pool.transactions, self.wallet)
-            self.transaction_pool.remove_from_pool(
-                self.transaction_pool.transactions)
-            message = Message(self.p2p.socketConnector, 'BLOCK', block)
-            self.p2p.broadcast(BlockchainUtils.encode(message))
-        else:
-            print('i am not the forger')
-
     def mkd_forge(self):
         node_coords = self.coords
-        block_data = self.blockchain.create_block(node_coords, self.transaction_pool.transactions, self.wallet, self.node_id)
+        block_data = self.blockchain.create_block(node_coords, self.transaction_pool.transactions, self.wallet,
+                                                  self.node_id)
         self.transaction_pool.remove_from_pool(self.transaction_pool.transactions)
         block = block_data[0]
         block.parent_hash = BlockchainUtils.hash(block_data[1].to_json()).hexdigest()
-        kdtree.create_subtree_hash(block_data[2])
+        # kdtree.create_subtree_hash(block_data[2])
         cluster_topic = self.cluster_id
         pub.unsubscribe(self.node_listener, cluster_topic)
         self.publish(block)
         self.blockchain_size += 1
         pub.subscribe(self.node_listener, cluster_topic)
-
-    def request_chain(self):
-        message = Message(self.p2p.socketConnector, 'BLOCKCHAINREQUEST', None)
-        self.p2p.broadcast(BlockchainUtils.encode(message))
 
     def move_node(self, old_cluster_id, new_cluster_id):
         # node will change cluster id to new cluster

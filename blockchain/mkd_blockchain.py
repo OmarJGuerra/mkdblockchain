@@ -15,7 +15,7 @@ class MKDBlockchain:
         self.execute_transactions(block.transactions)
         self.blocks.add(block)
         print('block add successful')
-        # self.blocks.append(block)03
+        # self.blocks.append(block)
 
     # modified loop to traverse the tree in order
     def to_json(self):
@@ -43,16 +43,11 @@ class MKDBlockchain:
 
     def get_parent(self, node):
         current = self.blocks
-        #print(f'node being passed into get_parent: {node}')
-        #print(f'current get_parent initial, before while loop: {current}')
         for kd_node in kdtree.level_order(current):
-            #print(f'kd_node: {kd_node}')
-            #print(f'kd_node.children(): {kd_node.children}')
             for tup in kd_node.children:
                 if tup[0].data.parent_hash == node.data.parent_hash:
                     return kd_node
         '''
-        
         if node.data.parent_hash == '0':
             return node
         while current is not None:
@@ -70,11 +65,6 @@ class MKDBlockchain:
             elif current.right is not None:
                 if node.data == current.right.data:
                     return current
-
-
-
-
-
 
 
 
@@ -130,17 +120,10 @@ class MKDBlockchain:
         return next_forger
 
     def create_block(self, node_coords, transactions_from_pool, forger_wallet, node_id):
-        # covered_transactions = self.get_covered_transaction_set(
-        #     transactions_from_pool)
-        #self.execute_transactions(transactions_from_pool)
         new_block = forger_wallet.create_block(transactions_from_pool, node_id, node_coords)
-
-        # check if we need add here or in separate function
-
         return_data = self.blocks.add(new_block)
         parent = return_data[1]
-        traversed_kdnodes = return_data[2]
-        return new_block, parent, traversed_kdnodes
+        return new_block, parent, False, return_data[0]
 
     def transaction_exists(self, transaction):
         for kd_node in kdtree.level_order(self.blocks):
@@ -166,8 +149,7 @@ class MKDBlockchain:
     def merkle_root(self):
         return self.blocks.subtree_hash
 
-    # TODO: loop through bc to add each node to self instead of the entire bc tree
-    # somewhat done ?
-    def merge(self, bc):
-        for b in bc.levelorder():
-            self.blocks.add_node(b)
+    # deprecated
+    # def merge(self, bc):
+    #     for b in bc.levelorder():
+    #         self.blocks.add_node(b)
