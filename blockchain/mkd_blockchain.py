@@ -140,14 +140,8 @@ class MKDBlockchain:
         else:
             return False
 
-    def transactions_valid(self, transactions):
-        covered_transactions = self.get_covered_transaction_set(transactions)
-        if len(covered_transactions) == len(transactions):
-            return True
-        return False
-
-    def merkle_root(self):
-        return self.blocks.subtree_hash
+    # def merkle_root(self):
+    #     return self.blocks.subtree_hash
 
     # deprecated
     # def merge(self, bc):

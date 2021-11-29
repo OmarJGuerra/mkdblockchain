@@ -218,7 +218,7 @@ class KDNode(Node):
         self.size = size
         self.right_size = right_size
         self.left_size = left_size
-        self.subtree_hash = BU.hash(self.data).hexdigest()
+        self.subtree_hash = BU.hash(self.data.coords).hexdigest()
 
     def to_json(self):
         j_data = {'axis': self.axis,
@@ -244,6 +244,7 @@ class KDNode(Node):
     def update_subtree_hash(self, point):
         hashh = point.subtree_hash
         nodeList = self.search_node_parent(point)
+
         while nodeList:
             if nodeList[1] is None:
                 if nodeList[2]:
@@ -407,32 +408,28 @@ class KDNode(Node):
     @require_axis
     def search_node_parent(self, node):
         temp = []
-        if node.data == self.data:
+        if node.data.coords == self.data.coords:
             return temp
         else:
-            if node.data[self.axis] < self.data[self.axis]:
-                # print(f'{node.data.coords[self.axis]} < {self.data.coords[self.axis]}')
+            if node.data.coords[self.axis] < self.data.coords[self.axis]:
                 if self.left is not None:
-                    if self.left.data == node.data:
+                    if self.left.data.coords == node.data.coords:
                         temp.append(self)
                         temp.append(self.right)
                         temp.append(0)
                         return temp
                     return self.left.search_node_parent(node)
                 else:
-                    # print('failed search')
                     return temp
             else:
-                # print(f'{node.data.coords[self.axis]} >= {self.data.coords[self.axis]}')
                 if self.right is not None:
-                    if self.right.data == node.data:
+                    if self.right.data.coords == node.data.coords:
                         temp.append(self)
                         temp.append(self.left)
                         temp.append(1)
                         return temp
                     return self.right.search_node_parent(node)
                 else:
-                    # print('failed search')
                     return temp
 
     def search_parent(self, node):
@@ -784,32 +781,32 @@ class KDNode(Node):
         return sel_func(candidates, key=max_key)
 
 
-def mergerr(root1, root2):
-    nodee = root2.search_node(root1)
+def mergerr(Nself, root1, root2):
+    nodee = root1.search_node(root2)
     if nodee:
-        if nodee.subtree_hash == root1.subtree_hash:
+        if nodee.subtree_hash == root2.subtree_hash:
              return
-        if root1.left:
-            mergerr(root1.left, root2)
-        if root1.right:
-            mergerr(root1.right, root2)
+        if root2.left:
+            mergerr(Nself, root1, root2.left)
+        if root2.right:
+            mergerr(Nself, root1, root2.right)
         return
-    if root1.left:
-        mergerr(root1.left, root2)
-    if root1.right:
-        mergerr(root1.right, root2)
-    root1.publish(root2.data)
+    if root2.left:
+        mergerr(Nself, root1, root2.left)
+    if root2.right:
+        mergerr(Nself, root1, root2.right)
+    Nself.publish(root2.data)
     return
 
 
-def identical_subtrees_and(root1, root2):
-    cw = csv.writer(open("duplicates.csv", 'a'))
+def identical_subtrees_and(test_num, root1, root2):
+    cw = csv.writer(open(f'duplicates_{test_num}.csv', 'a'))
     temp1 = ["B1 Size", "B2 Size", "B1,B2 Total", "No. Identical Subtrees", "Blocks in Id Trees", "total Id Blocks", "Identical / B1.size", "Identical / B2.size", "Ratio Id Blocks/ Id tree Blocks"]
     cw.writerow(list(temp1))
     temp1.clear()
     temp = list(compinfos(root1, root2))
     temp[1] = count_size(root2)
-    temp2 = [temp[0], temp[1], (temp[0] + temp[1] - temp[4]), temp[2], temp[3], temp[4], float(temp[4]/ (temp[0])), float(temp[4]/ (temp[1])), float(temp[4] / (temp[3]))]
+    temp2 = [temp[0], temp[1], (temp[0] + temp[1] - temp[4]), temp[2], temp[3], temp[4], float(temp[4]/ (temp[0])), float(temp[4]/ (temp[1]))]
     cw.writerow(list(temp2))
 
 
@@ -1038,14 +1035,16 @@ def level_order(tree, include_all=False):
             q.append(node.right or node.__class__())
 
 
-def bfprint(root):
+def bfprint(tree):
     temp = []
     temp2 = []
-    temp.append(root)
+    temp.append(tree)
 
+    temp.append("root")
     while temp:
+        i = 1
         for x in temp:
-            if x != "|":
+            if i % 2:
                 print("| ", end='')
                 print(x.subtree_hash, end='')
                 print("  /  ", end='')
@@ -1053,8 +1052,16 @@ def bfprint(root):
                 print(" |", end='')
                 if x.left:
                     temp2.append(x.left)
+                    temp2.append(x.subtree_hash)
                 if x.right:
                     temp2.append(x.right)
+                    temp2.append(x.subtree_hash)
+            else:
+                print(x)
+                print("| ", end='')
+                print("| ", end='')
+            i += 1
+
         print("\n")
         temp.clear()
         temp = copy.deepcopy(temp2)

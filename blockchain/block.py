@@ -9,7 +9,6 @@ class Block(dict):
     # def __init__(self, transactions, parent_hash, x, y, forger, block_count):
     def __init__(self, transactions, node_id, x, y, forger, t=time.time(), parent_hash=None, signature=''):
         dict.__init__(self)
-        # self.block_count = block
         self.coords = [node_id, x, y, t]
         self.transactions = transactions
         self.parent_hash = parent_hash
@@ -19,7 +18,7 @@ class Block(dict):
     def __getitem__(self, item):
         return self.coords[item]
 
-    # block[1] -> return self.coors[1]
+    # block[0] -> return self.coords[0]
     def __setitem__(self, key, value):
         self.coords[key] = value
 
@@ -40,7 +39,6 @@ class Block(dict):
     @staticmethod
     def genesis(genesis_node_id, forger):
         genesis_block = Block([], genesis_node_id, x=0, y=0, forger=forger, parent_hash='0')
-        # genesis_block.timestamp = 0
         return genesis_block
 
     def to_json(self):

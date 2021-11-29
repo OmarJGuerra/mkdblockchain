@@ -95,37 +95,13 @@ class Node:
 
     def handle_block(self, block):
         self.blockchain.blocks.add(block)
-        print('~~~~~~~~~~~~~~\n'
-              '~~~ HANDLE ~~~\n'
-              '~~~~~~~~~~~~~~')
-        kdtree.bfprint(self.blockchain.blocks)
+        # print('~~~~~~~~~~~~~~\n'
+        #       '~~~ HANDLE ~~~\n'
+        #       '~~~~~~~~~~~~~~')
+        # kdtree.bfprint(self.blockchain.blocks)
         self.blockchain_size += 1
         self.transaction_pool.remove_from_pool(block.transactions)
-        # for transaction in block.transactions:
-        #     if self.transaction_pool.transaction_exists(transaction):
-        #         self.transaction_pool.remove_from_pool(transaction)
 
-        # forger = block.forger
-        # block_hash = block.payload()d
-        # signature = block.signature
-        # block_count_valid = self.blockchain.block_count_valid(block)
-        # parent_block_hash_valid = self.blockchain.parent_block_hash_valid(block)
-        # forger_valid = self.blockchain.forger_valid(block)
-        # transactions_valid = self.blockchain.transactions_valid(
-        #    block.transactions)
-        # signature_valid = Wallet.signature_valid(block_hash, signature, forger)
-        # if not block_count_valid:
-        #     self.blockchain.request_chain()
-        # if last_block_hash_valid and forger_valid and transactions_valid and signature_valid:
-        #     self.blockchain.add_block(block)
-        #     self.transaction_pool.remove_from_pool(block.transactions)
-        #     message = Message(self.p2p.socketConnector, 'BLOCK', block)
-        #     self.p2p.broadcast(BlockchainUtils.encode(message))
-
-    # def handle_blockchain_request(self, requesting_node):
-    #     message = Message(self.p2p.socketConnector,
-    #                       'BLOCKCHAIN', self.blockchain)
-    #     self.p2p.send(requesting_node, BlockchainUtils.encode(message))
 
     # TODO: Need to add functionality for when blockchain is broadcast after merge and confirm function of deepcopy
     def handle_blockchain(self, blockchain):
@@ -164,42 +140,46 @@ class Node:
         merged_into_tree = first_tree  # if first_tree.size > second_tree.size else second_tree
         merging_tree = second_tree  # first_tree if merged_into_tree != first_tree else second_tree
 
-        print('~~~~~~~~~~~~~~\n'
-              '~~~ TREE 1 ~~~\n'
-              '~~~~~~~~~~~~~~')
+        # print('~~~~~~~~~~~~~~\n'
+        #       '~~~ TREE 1 ~~~\n'
+        #       '~~~~~~~~~~~~~~')
         #bfprint(merged_into_tree)
 
-        print('~~~~~~~~~~~~~~\n'
-              '~~~ TREE 2 ~~~\n'
-              '~~~~~~~~~~~~~~')
+        # print('~~~~~~~~~~~~~~\n'
+        #       '~~~ TREE 2 ~~~\n'
+        #       '~~~~~~~~~~~~~~')
         #kdtree.bfprint(merging_tree)
 
-        kdtree.identical_subtrees_and(merged_into_tree, merging_tree)
+        kdtree.identical_subtrees_and(self.test_num, merged_into_tree, merging_tree)
 
         merged_into_tree_size = merged_into_tree.size
         merging_tree_size = merging_tree.size
 
-        validation_time = open(f'data/validation_time_{self.test_num}.csv', mode='a')
+        validation_time = open(f'validation_time_{self.test_num}.csv', mode='a')
         validation_time_writer = csv.writer(validation_time, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
         nodes_published = 0
         nodes_not_published = 0
         before_merge = time.time()
-        for kd_node in kdtree.level_order(merging_tree):
-            if kd_node.data.parent_hash == '0':
-                continue
-            if not merged_into_tree.node_in_tree(kd_node):
-                p_node = node_to_aggregate.blockchain.get_parent(kd_node)
-                p_node_hash = BlockchainUtils.hash(p_node.data.to_json()).hexdigest()  # added hexdigest
-                # print(f'p_node_hash: {p_node_hash}, kd_node.data.parent_hash: {kd_node.data.parent_hash}')
-                if p_node_hash == kd_node.data.parent_hash:
-                    # need to publish
-                    self.publish(kd_node.data)
-                    # print(f'merge block published: {kd_node.data}')
-                    nodes_published += 1
-            else:
-                kdtree.identical_subtrees_and(merged_into_tree, merging_tree)
-                nodes_not_published += 1
+        cluster_topic = self.cluster_id
+
+        print("Before")
+        print("affirst")
+        kdtree.bfprint(first_tree)
+        print("afsecond")
+        kdtree.bfprint(second_tree)
+        pub.unsubscribe(node_to_aggregate.node_listener, cluster_topic)
+        kdtree.mergerr(self, first_tree, second_tree)
+        pub.subscribe(node_to_aggregate.node_listener, cluster_topic)
+        print("After")
+        print("affirst")
+        kdtree.bfprint(first_tree)
+        print("afsecond")
+        kdtree.bfprint(second_tree)
+        print("***********************************************")
+
+        kdtree.identical_subtrees_and(self.test_num, first_tree, second_tree)
+        cw = csv.writer(open(f'duplicates_{self.test_num}.csv', 'a'))
         after_merge = time.time() - before_merge
         validation_time_writer.writerow([self.cluster_id, self.node_id,
                                          node_to_aggregate.node_id, merging_tree_size, nodes_published,
@@ -210,18 +190,6 @@ class Node:
         node_to_aggregate.blockchain.blocks.size = copy.deepcopy(self.blockchain.blocks.size)
         node_to_aggregate.transaction_pool = copy.deepcopy(self.transaction_pool)
 
-        # TODO:
-        # for first_node, second_node in itertools.zip_longest(self.blockchain.blocks.level_order(),
-        #                                                      agg_node.blockchain.blocks.level_order()):
-        #     if first_node.blockchain.blocks.st_hash == second_node.blockchain.blocks.:
-        #         continue
-        #     '''#else:
-        #     else:
-        #
-        #     '''
-        # level order - for comparing trees
-        # children iterator to verify parent hash
-        # postorder if not verified to prune children
 
     def mkd_forge(self):
         node_coords = self.coords
@@ -230,7 +198,6 @@ class Node:
         self.transaction_pool.remove_from_pool(self.transaction_pool.transactions)
         block = block_data[0]
         block.parent_hash = BlockchainUtils.hash(block_data[1].to_json()).hexdigest()
-        # kdtree.create_subtree_hash(block_data[2])
         cluster_topic = self.cluster_id
         pub.unsubscribe(self.node_listener, cluster_topic)
         self.publish(block)
