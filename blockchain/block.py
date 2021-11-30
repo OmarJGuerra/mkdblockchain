@@ -7,7 +7,7 @@ from blockchain_utils import BlockchainUtils as BU
 # Should be changed to be more robust at a later time.
 class Block(dict):
     # def __init__(self, transactions, parent_hash, x, y, forger, block_count):
-    def __init__(self, transactions, node_id, x, y, forger, t=time.time(), parent_hash=None, signature=''):
+    def __init__(self, transactions, node_id, x, y, forger, t, parent_hash=None, signature=''):
         dict.__init__(self)
         self.coords = [node_id, x, y, t]
         self.transactions = transactions
@@ -38,7 +38,8 @@ class Block(dict):
 
     @staticmethod
     def genesis(genesis_node_id, forger):
-        genesis_block = Block([], genesis_node_id, x=0, y=0, forger=forger, parent_hash='0')
+        t = time.time()
+        genesis_block = Block([], genesis_node_id, x=0, y=0, forger=forger, t=t, parent_hash='0')
         return genesis_block
 
     def to_json(self):

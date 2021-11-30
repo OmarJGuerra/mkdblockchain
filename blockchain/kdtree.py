@@ -284,8 +284,7 @@ class KDNode(Node):
                 time_taken = time.time() - start_time
 
                 with open(f'time_to_add_block.csv', mode='a') as time_add:
-                    time_add_writer = csv.writer(time_add, delimiter='.', quotechar='"',
-                                                 quoting=csv.QUOTE_MINIMAL)
+                    time_add_writer = csv.writer(time_add, delimiter='.', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                     time_add_writer.writerow([self.size, self.left_size, self.right_size, time_taken])
                 return current
 
@@ -297,8 +296,7 @@ class KDNode(Node):
                     parent = current.data
                     current.left = current.create_subnode(point)
                     with open(f'time_to_add_block.csv', mode='a') as time_add:
-                        time_add_writer = csv.writer(time_add, delimiter='.', quotechar='"',
-                                                     quoting=csv.QUOTE_MINIMAL)
+                        time_add_writer = csv.writer(time_add, delimiter='.', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                         time_taken = time.time() - start_time
                         time_add_writer.writerow([self.size, self.left_size, self.right_size, time_taken])
                     self.update_subtree_hash(current.left)
@@ -313,8 +311,7 @@ class KDNode(Node):
                     parent = current.data
                     current.right = current.create_subnode(point)
                     with open(f'time_to_add_block.csv', mode='a') as time_add:
-                        time_add_writer = csv.writer(time_add, delimiter='.', quotechar='"',
-                                                     quoting=csv.QUOTE_MINIMAL)
+                        time_add_writer = csv.writer(time_add, delimiter='.', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                         time_taken = time.time() - start_time
                         time_add_writer.writerow([self.size, self.left_size, self.right_size, time_taken])
                         self.update_subtree_hash(current.right)
@@ -791,11 +788,11 @@ def mergerr(Nself, root1, root2):
         if root2.right:
             mergerr(Nself, root1, root2.right)
         return
+    Nself.publish(root2.data)
     if root2.left:
         mergerr(Nself, root1, root2.left)
     if root2.right:
         mergerr(Nself, root1, root2.right)
-    Nself.publish(root2.data)
     return
 
 
@@ -808,6 +805,8 @@ def identical_subtrees_and(test_num, root1, root2):
     temp[1] = count_size(root2)
     temp2 = [temp[0], temp[1], (temp[0] + temp[1] - temp[4]), temp[2], temp[3], temp[4], float(temp[4]/ (temp[0])), float(temp[4]/ (temp[1]))]
     cw.writerow(list(temp2))
+    cx = csv.writer(open(f"blockchains_{test_num-100}.csv", 'a'))
+    cx.writerow(list(temp2))
 
 
 def count_size(root):
@@ -1068,6 +1067,38 @@ def bfprint(tree):
         temp2.clear()
         temp2 = []
 
+def csv_bfprint(root, i):
+    temp = []
+    temp2 = []
+    temp.append(root)
+    temp.append("root")
+    cw = csv.writer(open(f"blockchains_{i}.csv", 'a'))
+    temp1 = ["NEW"]
+    cw.writerow(list(temp1))
+    temp1.clear()
+    cw.writerow(list(temp2))
+
+    while temp:
+        i = 1
+        for x in temp:
+            if i % 2 == 1:
+                temp1.append(str(x.data))
+                temp1.append(x.subtree_hash)
+                if x.left:
+                    temp2.append(x.left)
+                    temp2.append(x.data)
+                if x.right:
+                    temp2.append(x.right)
+                    temp2.append(x.data)
+            else:
+                temp1.append(str(x))
+                cw.writerow(list(temp1))
+                temp1.clear()
+            i += 1
+        temp.clear()
+        temp = copy.deepcopy(temp2)
+        temp2.clear()
+        i += 1
 
 def visualize(tree, max_level=100, node_width=10, left_padding=5):
     """Prints the tree to stdout."""

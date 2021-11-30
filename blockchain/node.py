@@ -140,18 +140,7 @@ class Node:
         merged_into_tree = first_tree  # if first_tree.size > second_tree.size else second_tree
         merging_tree = second_tree  # first_tree if merged_into_tree != first_tree else second_tree
 
-        # print('~~~~~~~~~~~~~~\n'
-        #       '~~~ TREE 1 ~~~\n'
-        #       '~~~~~~~~~~~~~~')
-        #bfprint(merged_into_tree)
-
-        # print('~~~~~~~~~~~~~~\n'
-        #       '~~~ TREE 2 ~~~\n'
-        #       '~~~~~~~~~~~~~~')
-        #kdtree.bfprint(merging_tree)
-
-        kdtree.identical_subtrees_and(self.test_num, merged_into_tree, merging_tree)
-
+        kdtree.identical_subtrees_and(self.test_num+100, first_tree, second_tree)
         merged_into_tree_size = merged_into_tree.size
         merging_tree_size = merging_tree.size
 
@@ -162,24 +151,43 @@ class Node:
         nodes_not_published = 0
         before_merge = time.time()
         cluster_topic = self.cluster_id
+        cx = csv.writer(open(f"blockchains_{self.test_num}.csv", 'a'))
+        cx.writerow(
+            list(["____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____"]))
+        cx.writerow(
+            list(["____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____"]))
 
-        print("Before")
-        print("affirst")
-        kdtree.bfprint(first_tree)
-        print("afsecond")
-        kdtree.bfprint(second_tree)
+        cx.writerow(
+            list(["____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____"]))
+        cx.writerow(
+            list(["____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____"]))
+
+        kdtree.csv_bfprint(first_tree, self.test_num)
+        cx.writerow(
+            list(["____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____"]))
+        kdtree.csv_bfprint(second_tree, self.test_num)
+        cx.writerow(
+            list(["____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____"]))
+
         pub.unsubscribe(node_to_aggregate.node_listener, cluster_topic)
         kdtree.mergerr(self, first_tree, second_tree)
         pub.subscribe(node_to_aggregate.node_listener, cluster_topic)
-        print("After")
-        print("affirst")
-        kdtree.bfprint(first_tree)
-        print("afsecond")
-        kdtree.bfprint(second_tree)
-        print("***********************************************")
+        cx.writerow(
+            list(["____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____"]))
 
-        kdtree.identical_subtrees_and(self.test_num, first_tree, second_tree)
-        cw = csv.writer(open(f'duplicates_{self.test_num}.csv', 'a'))
+        kdtree.identical_subtrees_and(self.test_num+100, first_tree, second_tree)
+        cx.writerow(
+            list(["____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____"]))
+
+        kdtree.csv_bfprint(first_tree, self.test_num)
+        cx.writerow(
+            list(["____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____"]))
+        kdtree.csv_bfprint(second_tree, self.test_num)
+        cx.writerow(
+            list(["____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____"]))
+        cx.writerow(
+            list(["%%%%", "%%%%", "%%%%", "%%%%", "%%%%", "%%%%", "%%%%", "%%%%", "%%%%", "%%%%", "%%%%", "%%%%"]))
+
         after_merge = time.time() - before_merge
         validation_time_writer.writerow([self.cluster_id, self.node_id,
                                          node_to_aggregate.node_id, merging_tree_size, nodes_published,
@@ -189,7 +197,6 @@ class Node:
         node_to_aggregate.blockchain_size = copy.deepcopy(self.blockchain_size)
         node_to_aggregate.blockchain.blocks.size = copy.deepcopy(self.blockchain.blocks.size)
         node_to_aggregate.transaction_pool = copy.deepcopy(self.transaction_pool)
-
 
     def mkd_forge(self):
         node_coords = self.coords

@@ -1,4 +1,5 @@
 import random
+import time
 
 from Crypto.PublicKey import RSA
 from transaction import Transaction
@@ -46,7 +47,8 @@ class Wallet:
         return transaction
 
     def create_block(self, transactions, node_id, coordinates):
-        block = Block(transactions, node_id, x=coordinates[0], y=coordinates[1], forger=self.public_key_string())
+        t = time.time()
+        block = Block(transactions, node_id, x=coordinates[0], y=coordinates[1], t=t, forger=self.public_key_string())
         signature = self.sign(block.payload())
         block.sign(signature)
         return block
