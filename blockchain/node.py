@@ -41,18 +41,21 @@ class Node:
         pub.subscribe(self.node_listener, cluster_topic)
 
     def node_listener(self, arg):
+        """
+        Listener that receives messages sent to its subscribed topic.
+
+        Uses the received message's type to determine how it should
+        be handled by the node. There are multiple handler functions
+        it can call to that effect.
+        """
         t = type(arg)
         if t is Block:
-            # print(f'n{self.node_id} in c{self.cluster_id} received Block: {arg}')
             self.handle_block(arg)
         elif t is MKDBlockchain:
-            # print(f'n{self.node_id} in c{self.cluster_id} received MKDBlockchain: {arg}')
             self.handle_blockchain(arg)
         elif t is SensorTransaction:
-            # print(f'n{self.node_id} in c{self.cluster_id} received SensorTransaction: {arg}')
             self.handle_sensor_transaction(arg)
         elif t is list:
-            # print(f'n{self.node_id} in c{self.cluster_id} received list: {arg}')
             self.handle_aggregator(arg)
 
     def move_listener(self, old_topic, new_topic):
@@ -60,6 +63,7 @@ class Node:
         pub.subscribe(self.node_listener, new_topic)
 
     def publish(self, message):
+        """Publish a message to the cluster."""
         cluster = self.cluster_id
         pub.sendMessage(cluster, arg=message)
 
@@ -140,7 +144,7 @@ class Node:
         merged_into_tree = first_tree  # if first_tree.size > second_tree.size else second_tree
         merging_tree = second_tree  # first_tree if merged_into_tree != first_tree else second_tree
 
-        kdtree.identical_subtrees_and(self.test_num+100, first_tree, second_tree)
+        # kdtree.identical_subtrees_and(self.test_num+100, first_tree, second_tree)
         merged_into_tree_size = merged_into_tree.size
         merging_tree_size = merging_tree.size
 
@@ -149,19 +153,10 @@ class Node:
 
         nodes_published = 0
         nodes_not_published = 0
-        before_merge = time.time()
         cluster_topic = self.cluster_id
         cx = csv.writer(open(f"blockchains_{self.test_num}.csv", 'a'))
         cx.writerow(
             list(["____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____"]))
-        cx.writerow(
-            list(["____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____"]))
-
-        cx.writerow(
-            list(["____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____"]))
-        cx.writerow(
-            list(["____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____"]))
-
         kdtree.csv_bfprint(first_tree, self.test_num)
         cx.writerow(
             list(["____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____"]))
@@ -169,13 +164,16 @@ class Node:
         cx.writerow(
             list(["____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____"]))
 
+        before_merge = time.time()
         pub.unsubscribe(node_to_aggregate.node_listener, cluster_topic)
-        kdtree.mergerr(self, first_tree, second_tree)
+        kdtree.rec_merge(self, first_tree, second_tree)
         pub.subscribe(node_to_aggregate.node_listener, cluster_topic)
+        after_merge = time.time() - before_merge
+
         cx.writerow(
             list(["____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____"]))
 
-        kdtree.identical_subtrees_and(self.test_num+100, first_tree, second_tree)
+        # kdtree.identical_subtrees_and(self.test_num+100, first_tree, second_tree)
         cx.writerow(
             list(["____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____", "____"]))
 
@@ -188,7 +186,6 @@ class Node:
         cx.writerow(
             list(["%%%%", "%%%%", "%%%%", "%%%%", "%%%%", "%%%%", "%%%%", "%%%%", "%%%%", "%%%%", "%%%%", "%%%%"]))
 
-        after_merge = time.time() - before_merge
         validation_time_writer.writerow([self.cluster_id, self.node_id,
                                          node_to_aggregate.node_id, merging_tree_size, nodes_published,
                                          nodes_not_published, after_merge])
@@ -199,6 +196,13 @@ class Node:
         node_to_aggregate.transaction_pool = copy.deepcopy(self.transaction_pool)
 
     def mkd_forge(self):
+        """
+        Forge a block and publish it to all other members.
+
+        Uses the node's data and transaction pool to forge a block.
+        The transaction pool is then cleared and the node will publish the new
+        block to all other nodes subscribed to its cluster.
+        """
         node_coords = self.coords
         block_data = self.blockchain.create_block(node_coords, self.transaction_pool.transactions, self.wallet,
                                                   self.node_id)

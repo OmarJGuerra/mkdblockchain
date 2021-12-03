@@ -1,104 +1,69 @@
 from blockchain_utils import BlockchainUtils
 from account_model import AccountModel
 from proof_of_stake import ProofOfStake
-import kdtree  # removed from blockchain
+import kdtree
 
 
 class MKDBlockchain:
-    def __init__(self, dimensions, gnode_id, genesis_forger):
-        # self.blocks = kdtree.KDNode(Block.genesis(), left=None, right=None, axis=0, sel_axis=1, )
-        self.blocks = kdtree.create_root(dimensions, gnode_id, genesis_forger)
+    """
+    A Merkle KD-Blockchain.
+
+    Attributes:
+        blocks (KDNode): Root node of the Merkle KD-Tree
+        account_model (AccountModel): Model of all transactors involved in the blockchain
+        pos (ProofOfStake): Consensus mechanism
+
+    Methods:
+        add_block(block)
+        get_parent()
+        execute_transactions()
+        execute_transaction()
+        next_forger()
+        create_block()
+        transaction_exists()
+        to_json()
+    """
+
+    def __init__(self, dimensions, gen_node_id, genesis_forger):
+        """
+        Construct an MKDBlockchain object.
+
+        Parameters:
+            dimensions (int): Dimensionality of the KD-Tree
+            gen_node_id (int): ID of the node that forges the genesis block (median of total nodes)
+            genesis_forger (str): Public key string of the wallet that forged the genesis block
+        """
+        self.blocks = kdtree.create_root(dimensions, gen_node_id, genesis_forger)
         self.account_model = AccountModel()
         self.pos = ProofOfStake()
 
     def add_block(self, block):
+        """
+        Add a block to the blockchain.
+
+        Parameters:
+            block (Block): the block to be inserted
+        """
         self.execute_transactions(block.transactions)
         self.blocks.add(block)
         print('block add successful')
         # self.blocks.append(block)
 
-    # modified loop to traverse the tree in order
-    def to_json(self):
-        j_data = {}
-        json_blocks = []
-        for block in self.blocks.inorder():
-            json_blocks.append(block.to_json())
-        j_data['blocks'] = json_blocks
-        j_data['pos'] = self.pos.to_json()
-        return j_data
-
-    # NOTE: Might not need blockcount
-    def block_count_valid(self, block):
-        if self.blocks[-1].block_count == block.block_count - 1:
-            return True
-        else:
-            return False
-
-    def parent_block_hash_valid(self, block):
-        parent_block_hash = BlockchainUtils.hash(block).hexdigest()
-        if parent_block_hash == block.parent_hash:
-            return True
-        else:
-            return False
-
     def get_parent(self, node):
+        """Get the parent of a node in the blockchain."""
         current = self.blocks
         for kd_node in kdtree.level_order(current):
             for tup in kd_node.children:
                 if tup[0].data.parent_hash == node.data.parent_hash:
                     return kd_node
-        '''
-        if node.data.parent_hash == '0':
-            return node
-        while current is not None:
-            print(f'current from get_parent: {current}')
-            # TODO: GET CORRECT PHASH FOR GENESIS OR DEAL WITH THE ERROR
-            if current.left is None and current.right is None:
-                if current.data.parent_hash == node.datad
-            if current.left is not None:
-                if node.data == current.left.data:
-                    return current
-                elif node.data[current.axis] < current.data[current.axis]:
-                    current = current.left
-            else:
-
-            elif current.right is not None:
-                if node.data == current.right.data:
-                    return current
-
-
-
-
-            if node.data[current.axis] < current.data[current.axis]:
-                current = current.left
-            else:
-                current = current.right
-    '''
-
-    def get_covered_transaction_set(self, transactions):
-        covered_transactions = []
-        for transaction in transactions:
-            if self.transaction_covered(transaction):
-                covered_transactions.append(transaction)
-            else:
-                print('transaction is not covered by sender')
-        return covered_transactions
-
-    def transaction_covered(self, transaction):
-        if transaction.tr_type == 'EXCHANGE':
-            return True
-        sender_balance = self.account_model.get_balance(
-            transaction.sender_public_key)
-        if sender_balance >= transaction.amount:
-            return True
-        else:
-            return False
 
     def execute_transactions(self, transactions):
+        """Execute multiple transactions"""
         for transaction in transactions:
             self.execute_transaction(transaction)
 
     def execute_transaction(self, transaction):
+        """Execute a transaction"""
         if transaction.tr_type == 'STAKE':
             sender = transaction.sender_public_key
             receiver = transaction.receiver_public_key
@@ -114,36 +79,56 @@ class MKDBlockchain:
             self.account_model.update_balance(receiver, amount)
 
     def next_forger(self):
+        """
+        Determine the node that will forge the next block
+
+        Returns:
+            next_forger (str): public key of the forging node
+        """
         parent_block_hash = BlockchainUtils.hash(
             self.blocks.latest_point.payload()).hexdigest()
         next_forger = self.pos.forger(parent_block_hash)
         return next_forger
 
     def create_block(self, node_coords, transactions_from_pool, forger_wallet, node_id):
+        """
+        Create a block.
+
+        Parameters:
+            node_coords (list): coordinates of the forger node
+            transactions_from_pool (list): list of transactions currently in the pool
+            forger_wallet (Wallet): wallet that will forge the block
+            node_id (int): id of the forger node
+
+        Returns:
+              new_block (Block): the forged block
+              parent (KDNode): parent of the node that was created with the block
+        """
         new_block = forger_wallet.create_block(transactions_from_pool, node_id, node_coords)
         return_data = self.blocks.add(new_block)
         parent = return_data[1]
         return new_block, parent, False, return_data[0]
 
     def transaction_exists(self, transaction):
+        """Check if a given transaction is already in the tree."""
         for kd_node in kdtree.level_order(self.blocks):
             for block_transaction in kd_node.data.transactions:
                 if transaction.id == block_transaction.id:
                     return True
         return False
 
-    def forger_valid(self, block):
-        forger_public_key = self.pos.forger(block.last_hash)
-        proposed_block_forger = block.forger
-        if forger_public_key == proposed_block_forger:
-            return True
-        else:
-            return False
+# modified loop to traverse the tree in order
+    def to_json(self):
+        """
+        Represent the MKD Blockchain as json data.
 
-    # def merkle_root(self):
-    #     return self.blocks.subtree_hash
-
-    # deprecated
-    # def merge(self, bc):
-    #     for b in bc.levelorder():
-    #         self.blocks.add_node(b)
+        Returns:
+            j_data (dict): A json representation of the MKD Blockchain
+        """
+        j_data = {}
+        json_blocks = []
+        for block in self.blocks.inorder():
+            json_blocks.append(block.to_json())
+        j_data['blocks'] = json_blocks
+        j_data['pos'] = self.pos.to_json()
+        return j_data

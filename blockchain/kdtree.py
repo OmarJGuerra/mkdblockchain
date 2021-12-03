@@ -28,7 +28,7 @@ __website__ = 'https://github.com/stefankoegl/kdtree'
 __license__ = 'ISC license'
 
 
-class Node(dict, object):
+class BaseNode(dict, object):
     """
     A Node in a kd-tree.
 
@@ -36,6 +36,7 @@ class Node(dict, object):
     its subtree.
     """
     def __init__(self, data=None, left=None, right=None):
+        super().__init__()
         self.data = data
         self.left = left
         self.right = right
@@ -48,10 +49,10 @@ class Node(dict, object):
         """
         Returns True if a Node has no subnodes.
         eg:
-                >>> Node().is_leaf
+                >>> BaseNode().is_leaf
                 True
 
-                >>> Node( 1, left=Node(2) ).is_leaf
+                >>> BaseNode( 1, left=BaseNode(2) ).is_leaf
                 False
         """
         return (not self.data) or \
@@ -196,20 +197,25 @@ def require_axis(f):
     return _wrapper
 
 
-class KDNode(Node):
+class KDNode(BaseNode):
     """A Node that contains kd-tree specific data and methods."""
 
     def __init__(self, data=None, left=None, right=None, axis=None,
                  sel_axis=None, dimensions=None, size=0, right_size=0, left_size=0):
         """
-        Creates a new node for a kd-tree.
+        Construct a new node for a kd-tree.
 
-        If the node will be used within a tree, the axis and the sel_axis
-        function should be supplied.
-        sel_axis(axis) is used when creating subnodes of the current node. It
-        receives the axis of the parent node and returns the axis of the child
-        node.
-
+        Parameters:
+            data (Point): any point-like object with coordinates
+            left (KDNode): left child
+            right (KDNode): right child
+            axis (int): dimension index of this KDNode
+            sel_axis: a function used when creating child nodes
+            dimensions (int): total dimensions of the tree
+        Data Parameters:
+            size (int): size of the tree
+            right_size (int): size of the right branch
+            left_size(int): size of the left branch
         """
         super(KDNode, self).__init__(data, left, right)
         self.axis = axis
@@ -233,7 +239,7 @@ class KDNode(Node):
 
     def __len__(self):
         i = 0
-        for b in self.inorder():
+        for _ in self.inorder():
             i += 1
         return i
 
@@ -241,25 +247,35 @@ class KDNode(Node):
         return f'KDNode({self.data}, {self.axis}, {self.dimensions}, {self.subtree_hash}'
 
     @require_axis
-    def update_subtree_hash(self, point):
-        hashh = point.subtree_hash
-        nodeList = self.search_node_parent(point)
+    def update_subtree_hash(self, tree2):
+        """
+        Update the subtree hash of a Merkle KD-tree.
 
-        while nodeList:
-            if nodeList[1] is None:
-                if nodeList[2]:
-                    nodeList[0].subtree_hash = copy.deepcopy(concat_hashes("None", hashh, nodeList[0].subtree_hash))
+        Hashes are updated in bottom-up fashion. The hash
+        of the parent is included in the concatenation.
+            (left + right + parent)
+        Parameters:
+            tree2 (KDNode): node of a KD-Tree
+        """
+        tree2_hash = tree2.subtree_hash
+        node_list = self.search_node_parent(tree2)
+
+        # First entry if second tree's parent is found
+        while node_list:
+            if node_list[1] is None:
+                if node_list[2]:
+                    node_list[0].subtree_hash = copy.deepcopy(concat_hashes("None", tree2_hash, node_list[0].subtree_hash))
                 else:
-                    nodeList[0].subtree_hash = copy.deepcopy(concat_hashes(hashh, "None", nodeList[0].subtree_hash))
+                    node_list[0].subtree_hash = copy.deepcopy(concat_hashes(tree2_hash, "None", node_list[0].subtree_hash))
             else:
-                if nodeList[2]:
-                    nodeList[0].subtree_hash = copy.deepcopy(
-                        concat_hashes(nodeList[1].subtree_hash, hashh, nodeList[0].subtree_hash))
+                if node_list[2]:
+                    node_list[0].subtree_hash = copy.deepcopy(
+                        concat_hashes(node_list[1].subtree_hash, tree2_hash, node_list[0].subtree_hash))
                 else:
-                    nodeList[0].subtree_hash = copy.deepcopy(
-                        concat_hashes(hashh, nodeList[1].subtree_hash, nodeList[0].subtree_hash))
-            hashh = nodeList[0].subtree_hash
-            nodeList = self.search_node_parent(nodeList[0])
+                    node_list[0].subtree_hash = copy.deepcopy(
+                        concat_hashes(tree2_hash, node_list[1].subtree_hash, node_list[0].subtree_hash))
+            tree2_hash = node_list[0].subtree_hash
+            node_list = self.search_node_parent(node_list[0])
 
     @require_axis
     def add(self, point):  # point refers to a block for our purposes
@@ -284,7 +300,7 @@ class KDNode(Node):
                 time_taken = time.time() - start_time
 
                 with open(f'time_to_add_block.csv', mode='a') as time_add:
-                    time_add_writer = csv.writer(time_add, delimiter='.', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                    time_add_writer = csv.writer(time_add, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                     time_add_writer.writerow([self.size, self.left_size, self.right_size, time_taken])
                 return current
 
@@ -377,57 +393,70 @@ class KDNode(Node):
         else:
             print("Node already in tree")
 
-
     @require_axis
     def node_in_tree(self, node):
+        """Returns: True if node in tree, False otherwise"""
         return True if self.search_node(node) is not None else False
 
     @require_axis
     def search_node(self, node):
+        """
+        Search the tree for a given node.
+
+        KD search is an implementation of binary search. Instead of
+        only comparing one type of value, it cycles through the tree's
+        dimensions at each layer of the tree in order to compare a
+        different dimensional value with every step.
+        Each KD node in the tree stores its dimensional axis to make
+        it easier to know which level it resides in.
+
+        Returns:
+            self (KDNode): the node found in the tree
+            None: nothing if the node was not found
+        """
         if node.data.coords == self.data.coords:
             return self
         else:
             if node.data.coords[self.axis] < self.data.coords[self.axis]:
-                # print(f'{node.data.coords[self.axis]} < {self.data.coords[self.axis]}')
-                if self.left is not None:
-                    return self.left.search_node(node)
-                else:
-                    # print('failed search')
-                    return
+                return self.left.search_node(node) if self.left is not None else None
             else:
-                # print(f'{node.data.coords[self.axis]} >= {self.data.coords[self.axis]}')
-                if self.right is not None:
-                    return self.right.search_node(node)
-                else:
-                    # print('failed search')
-                    return
+                return self.right.search_node(node) if self.right is not None else None
 
     @require_axis
     def search_node_parent(self, node):
-        temp = []
+        """
+        Search the tree for a given node's parent.
+
+        Same search mechanism as search_node, but returns
+        the found parent along with its children.
+
+        Returns:
+            search_info (list): list that contains a found parent and its children
+        """
+        search_info = []
         if node.data.coords == self.data.coords:
-            return temp
+            return search_info
         else:
             if node.data.coords[self.axis] < self.data.coords[self.axis]:
                 if self.left is not None:
                     if self.left.data.coords == node.data.coords:
-                        temp.append(self)
-                        temp.append(self.right)
-                        temp.append(0)
-                        return temp
+                        search_info.append(self)
+                        search_info.append(self.right)
+                        search_info.append(0)
+                        return search_info
                     return self.left.search_node_parent(node)
                 else:
-                    return temp
+                    return search_info
             else:
                 if self.right is not None:
                     if self.right.data.coords == node.data.coords:
-                        temp.append(self)
-                        temp.append(self.left)
-                        temp.append(1)
-                        return temp
+                        search_info.append(self)
+                        search_info.append(self.left)
+                        search_info.append(1)
+                        return search_info
                     return self.right.search_node_parent(node)
                 else:
-                    return temp
+                    return search_info
 
     def search_parent(self, node):
         if node.data.coords == self.data.coords:
@@ -778,77 +807,152 @@ class KDNode(Node):
         return sel_func(candidates, key=max_key)
 
 
-def mergerr(Nself, root1, root2):
-    nodee = root1.search_node(root2)
-    if nodee:
-        if nodee.subtree_hash == root2.subtree_hash:
-             return
-        if root2.left:
-            mergerr(Nself, root1, root2.left)
-        if root2.right:
-            mergerr(Nself, root1, root2.right)
+def rec_merge(agg_node, tree1, tree2):
+    """
+    Recursively merge two MKD-trees while ignoring identical subtrees.
+
+    Searches the first tree for each of the second tree's nodes recursively.
+    If a node is not found, it is published to all members, including the publisher.
+    Ignores identical subtrees by comparing the subtree hashes.
+
+    Parameters:
+        agg_node (Node): network node performing the aggregation (NOT BaseNode)
+        tree1 (KDNode): first tree involved in the merge
+        tree2 (KDNode): second tree involved in the merge
+    """
+    test_node = tree1.search_node(tree2)
+    if test_node:
+        # Identical subtree detection
+        if test_node.subtree_hash == tree2.subtree_hash:
+            return
+        # Only identical node, not identical subtree.
+        if tree2.left:
+            rec_merge(agg_node, tree1, tree2.left)
+        if tree2.right:
+            rec_merge(agg_node, tree1, tree2.right)
         return
-    Nself.publish(root2.data)
-    if root2.left:
-        mergerr(Nself, root1, root2.left)
-    if root2.right:
-        mergerr(Nself, root1, root2.right)
+    agg_node.publish(tree2.data)
+
+    # After publishing, keep traversing if possible.
+    if tree2.left:
+        rec_merge(agg_node, tree1, tree2.left)
+    if tree2.right:
+        rec_merge(agg_node, tree1, tree2.right)
     return
 
 
-def identical_subtrees_and(test_num, root1, root2):
+def mergerr_no_iden(agg_node, tree1, tree2):
+    """
+    Recursively merge two MKD-trees.
+
+    Searches the first tree for each of the second tree's nodes recursively.
+    If a node is not found, it is published to all other members.
+
+    Parameters:
+        agg_node (Node): network node performing the aggregation (NOT BaseNode)
+        tree1 (KDNode): first tree involved in the merge
+        tree2 (KDNode): second tree involved in the merge
+    """
+    nodee = tree1.search_node(tree2)
+    if nodee:
+        if tree2.left:
+            rec_merge(agg_node, tree1, tree2.left)
+        if tree2.right:
+            rec_merge(agg_node, tree1, tree2.right)
+        return
+    agg_node.publish(tree2.data)
+    if tree2.left:
+        rec_merge(agg_node, tree1, tree2.left)
+    if tree2.right:
+        rec_merge(agg_node, tree1, tree2.right)
+    return
+
+
+def identical_subtrees(test_num, root1, root2):
+    """
+    Detect identical subtrees between two Merkle KD-trees.
+
+    Parameters:
+        test_num (int): version of the test that is running
+        root1 (KDNode): root node of the first tree
+        root2 (KDNode): root node of the second tree
+    """
     cw = csv.writer(open(f'duplicates_{test_num}.csv', 'a'))
-    temp1 = ["B1 Size", "B2 Size", "B1,B2 Total", "No. Identical Subtrees", "Blocks in Id Trees", "total Id Blocks", "Identical / B1.size", "Identical / B2.size", "Ratio Id Blocks/ Id tree Blocks"]
+    temp1 = ["B1 Size", "B2 Size", "B1,B2 Total", "No. Identical Subtrees", "Blocks in Id Trees", "total Id Blocks",
+             "Identical / B1.size", "Identical / B2.size", "Ratio Id Blocks/ Id tree Blocks"]
     cw.writerow(list(temp1))
     temp1.clear()
-    temp = list(compinfos(root1, root2))
+
+    temp = list(comp_info(root1, root2))
     temp[1] = count_size(root2)
-    temp2 = [temp[0], temp[1], (temp[0] + temp[1] - temp[4]), temp[2], temp[3], temp[4], float(temp[4]/ (temp[0])), float(temp[4]/ (temp[1]))]
+    temp2 = [temp[0], temp[1], (temp[0] + temp[1] - temp[4]), temp[2], temp[3], temp[4],
+             float(temp[4]/(temp[0])), float(temp[4]/(temp[1]))]
     cw.writerow(list(temp2))
     cx = csv.writer(open(f"blockchains_{test_num-100}.csv", 'a'))
     cx.writerow(list(temp2))
 
 
 def count_size(root):
+    """Count the number of nodes in a Merkle KD-tree."""
     i = 1
     if root.left is not None:
-        i = i + count_size(root.left)
+        i += count_size(root.left)
     if root.right is not None:
-        i = i + count_size(root.right)
+        i += count_size(root.right)
     return i
 
 
-def compinfos(root1, root2):
-    """iterator for nodes: left, right, root"""
-    # "B1 Size", "B2 Size", "No. Identical Subtrees", "Blocks in Id Trees", "total Id Blocks"
-    infos = [0, 0, 0, 0, 0]
+def comp_info(root1, root2):
+    """
+    Compile Merkle KD-tree information.
+
+    Traverses in post-order (left, right, parent).
+    An info array is used to collect all relevant data points.
+        info[0]: size of first tree
+        info[1]: size of second tree
+        info[2]: number of identical subtrees
+        info[3]: amount of blocks in identical subtrees
+        info[4]: total number of identical blocks
+
+    Parameters:
+        root1 (KDNode): root of first tree
+        root2 (KDNode): root of second tree
+
+    Returns:
+        info (list): compiled list of information
+    """
+    info = [0, 0, 0, 0, 0]
     if not root1:
-        return infos
+        return info
     else:
-        infos[0] = 1
+        info[0] = 1
     nodee = root2.search_node(root1)
+    # If the node is found, test for identical subtree
     if nodee:
+        # Identical subtree information is recorded
         if nodee.subtree_hash == root1.subtree_hash:
-            infos[0] = count_size(root1)
-            infos[2] = 1
-            infos[3] = infos[0]
-            infos[4] = infos[0]
-            return infos
+            info[0] = count_size(root1)
+            info[2] = 1
+            info[3] = info[0]
+            info[4] = info[0]
+            return info
         else:
-            infos[4] = 1
+            info[4] = 1
+
+    # The node is not found, check children
     if root1.left:
-        temp = compinfos(root1.left, root2)
-        infos[0] += temp[0]
-        infos[2] += temp[2]
-        infos[3] += temp[3]
-        infos[4] += temp[4]
+        temp = comp_info(root1.left, root2)
+        info[0] += temp[0]
+        info[2] += temp[2]
+        info[3] += temp[3]
+        info[4] += temp[4]
     if root1.right:
-        temp = compinfos(root1.right, root2)
-        infos[0] += temp[0]
-        infos[2] += temp[2]
-        infos[3] += temp[3]
-        infos[4] += temp[4]
-    return infos
+        temp = comp_info(root1.right, root2)
+        info[0] += temp[0]
+        info[2] += temp[2]
+        info[3] += temp[3]
+        info[4] += temp[4]
+    return info
 
 
 def collect_hash(root):
@@ -933,15 +1037,9 @@ def collect_hash(root):
 #         print('Invalid')
 
 
-def concat_hashes(hash1, hash2, parentHash):
-    return BU.hash(hash1 + hash2 + parentHash).hexdigest()
-
-
-def concat_hash_list(hashes):
-    concat = ''
-    for h in hashes:
-        concat += h
-    return BU.hash(concat).hexdigest()
+def concat_hashes(hash1, hash2, parent_hash):
+    """Concatenate the hash of a parent with those of its children."""
+    return BU.hash(hash1 + hash2 + parent_hash).hexdigest()
 
 
 def create(point_list=None, dimensions=None, axis=0, sel_axis=None):
@@ -999,6 +1097,7 @@ def create(point_list=None, dimensions=None, axis=0, sel_axis=None):
 
 
 def create_root(dimensions, genesis_node_id, forger, sel_axis=None):
+    """"""
     sel_axis = sel_axis or (lambda prev_axis: (prev_axis + 1) % dimensions)
     g_block = block.Block.genesis(genesis_node_id, forger)
     return KDNode(g_block, left=None, right=None, axis=0, sel_axis=sel_axis, size=1)
@@ -1067,17 +1166,23 @@ def bfprint(tree):
         temp2.clear()
         temp2 = []
 
-def csv_bfprint(root, i):
-    temp = []
-    temp2 = []
-    temp.append(root)
-    temp.append("root")
-    cw = csv.writer(open(f"blockchains_{i}.csv", 'a'))
-    temp1 = ["NEW"]
-    cw.writerow(list(temp1))
-    temp1.clear()
-    cw.writerow(list(temp2))
 
+def csv_bfprint(root, test_num):
+    """
+    Print an MKD-tree into a .csv file.
+
+    A breadth-first search algorithm modified in order to
+    write the node, its parent, and its subtree hash to a .csv file.
+
+    Parameters:
+        root (KDNode): node representing the root of the tree
+        test_num (int): number of the test that is running the function
+    """
+    temp = [root, "root"]
+    cw = csv.writer(open(f"blockchains_{test_num}.csv", 'a'))
+
+    temp1 = []
+    temp2 = []
     while temp:
         i = 1
         for x in temp:
@@ -1099,6 +1204,7 @@ def csv_bfprint(root, i):
         temp = copy.deepcopy(temp2)
         temp2.clear()
         i += 1
+
 
 def visualize(tree, max_level=100, node_width=10, left_padding=5):
     """Prints the tree to stdout."""
