@@ -841,7 +841,7 @@ def rec_merge(agg_node, tree1, tree2):
     return
 
 
-def mergerr_no_iden(agg_node, tree1, tree2):
+def rec_merge_no_iden(agg_node, tree1, tree2):
     """
     Recursively merge two MKD-trees.
 
@@ -869,23 +869,18 @@ def mergerr_no_iden(agg_node, tree1, tree2):
 
 
 def identical_subtrees(test_num, root1, root2):
-    """
-    Detect identical subtrees between two Merkle KD-trees.
-
-    Parameters:
-        test_num (int): version of the test that is running
-        root1 (KDNode): root node of the first tree
-        root2 (KDNode): root node of the second tree
-    """
+    """Detect identical subtrees between two Merkle KD-trees."""
     cw = csv.writer(open(f'duplicates_{test_num}.csv', 'a'))
-    temp1 = ["B1 Size", "B2 Size", "B1,B2 Total", "No. Identical Subtrees", "Blocks in Id Trees", "total Id Blocks",
-             "Identical / B1.size", "Identical / B2.size", "Ratio Id Blocks/ Id tree Blocks"]
+    temp1 = ["B1 Size", "B2 Size", "B1,B2 Total",
+             "No. Identical Subtrees", "Blocks in Id Trees", "total Id Blocks",
+             "Identical / B1.size", "Identical / B2.size"]
     cw.writerow(list(temp1))
     temp1.clear()
 
     temp = list(comp_info(root1, root2))
     temp[1] = count_size(root2)
-    temp2 = [temp[0], temp[1], (temp[0] + temp[1] - temp[4]), temp[2], temp[3], temp[4],
+    temp2 = [temp[0], temp[1], (temp[0] + temp[1] - temp[4]),
+             temp[2], temp[3], temp[4],
              float(temp[4]/(temp[0])), float(temp[4]/(temp[1]))]
     cw.writerow(list(temp2))
     cx = csv.writer(open(f"blockchains_{test_num-100}.csv", 'a'))
@@ -907,30 +902,23 @@ def comp_info(root1, root2):
     Compile Merkle KD-tree information.
 
     Traverses in post-order (left, right, parent).
-    An info array is used to collect all relevant data points.
+    Info array is used to collect relevant data points.
         info[0]: size of first tree
         info[1]: size of second tree
         info[2]: number of identical subtrees
         info[3]: amount of blocks in identical subtrees
         info[4]: total number of identical blocks
-
-    Parameters:
-        root1 (KDNode): root of first tree
-        root2 (KDNode): root of second tree
-
-    Returns:
-        info (list): compiled list of information
     """
     info = [0, 0, 0, 0, 0]
     if not root1:
         return info
     else:
         info[0] = 1
-    nodee = root2.search_node(root1)
+    test_node = root2.search_node(root1)
     # If the node is found, test for identical subtree
-    if nodee:
+    if test_node:
         # Identical subtree information is recorded
-        if nodee.subtree_hash == root1.subtree_hash:
+        if test_node.subtree_hash == root1.subtree_hash:
             info[0] = count_size(root1)
             info[2] = 1
             info[3] = info[0]
@@ -938,7 +926,6 @@ def comp_info(root1, root2):
             return info
         else:
             info[4] = 1
-
     # The node is not found, check children
     if root1.left:
         temp = comp_info(root1.left, root2)
