@@ -1,12 +1,17 @@
-## MKD-Blockchain
-This is an implementation of a **Sensor-Chain**-like blockchain, with spatiotemporal and Merkle KD-Tree capabilities.
+## SensorChain 3.0
+The latest iteration of SensorChain.
 
 
 ### Installation
-To run the code, a conda environment is needed.
+Python 3 dependencies:
+1. pycryptodome
+2. pypubsub
+3. jsonpickle
 
-1. Install Anaconda
-2. Using the Anaconda Prompt, navigate to the project directory
-3. Run the command `conda env create --file environment.yml`
-4. Run `conda activate bcenv`
-5. Start the code (will work on this later)
+Once the necessary modules are installed, simply navigate to the root directory and run main.py.
+
+This version makes use of multiprocessing to run multiple tests at once.
+To run a certain dataset, uncomment the corresponding multiprocess expression in main.py.
+
+WARNING: The datasets are very large; with enough time the computer running the code could slow down and begin stalling.
+This is to be expected and is not an issue with the code. For a brief run use test 10.
